@@ -4,9 +4,9 @@ Energy Exchange Istanbul (EXIST) or Enerji Piyasaları İşletme A.Ş. (EPİAŞ)
 
 ## Transparency Platform
 
-Transparency Platform provides necessary data for the transparent, reliable, fair and predictable operation of energy markets. You can acsess transparency platform from [here](https://seffaflik.epias.com.tr/transparency/index.xhtml).
+Transparency Platform provides necessary data for the transparent, reliable, fair and predictable operation of energy markets. You can access platform from [here](https://seffaflik.epias.com.tr/transparency/index.xhtml).
 
-Also, Transparency API is available for everyone. In the [Python Documentation](https://github.com/onurhakki/exist/blob/main/transparency/Main.ipynb), you can acsess technical documentation details, required and optinal parameters and request data with selected parameters.
+Also, Transparency API is available for everyone. In the [Notebook](https://github.com/onurhakki/exist/blob/main/transparency/Main.ipynb), you can access technical documentation details, required/optional parameters, thereafter you can request data with selected parameters.
 
 
 
