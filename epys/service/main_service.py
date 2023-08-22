@@ -2,10 +2,15 @@
 from data.mof import MOF
 from data.market import Market
 from data.precon import Precon
+from data.invoice import Invoice
+from data.imbalance import Imbalance
+from data.bpm import Bpm
+from data.res import RES
+from data.rbs import RBS
 
 from service.tgt import RequestFunctions
 
-class WebService(RequestFunctions, MOF, Market, Precon): #, 
+class WebService(RequestFunctions, MOF, Market, Precon, Invoice, Imbalance, Bpm, RES, RBS): #, 
     def __init__(self, username, organizationId):
         """
         
