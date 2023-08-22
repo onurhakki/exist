@@ -100,7 +100,7 @@ class MOF():
         Notlar
         ---------
          - Aylık periyotlar kullanılmıştır.
-         - version >= period olmalıdır.
+         - version > period olmalıdır.
         """
 
         if period == None:
