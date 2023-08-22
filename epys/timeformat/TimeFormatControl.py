@@ -33,11 +33,23 @@ class TimeFormatControl():
     def control_order_dates_equal(low, high):
         low = datetime.datetime.strptime(low, time_format)
         high = datetime.datetime.strptime(high, time_format)
+
         if low > high:
             print("End Date >= Start Date.")
             return False
         else:
             return True
+
+    def control_order_dates_equal_period_date(low, high):
+        low = datetime.datetime.strptime(low, time_format)
+        high = datetime.datetime.strptime(high, time_format)
+
+        if low > high:
+            print("Start Date >= period.")
+            return False
+        else:
+            return True
+
 
     def control_month(date):
         if type(date) != tuple:
