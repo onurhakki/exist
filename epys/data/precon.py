@@ -562,7 +562,7 @@ class Precon():
         if TimeFormatControl.control_order_dates_equal(DateStart, DateEnd) == False:
             return False
 
-        if TimeFormatControl.control_order_dates_equal(period, DateStart) == False:
+        if TimeFormatControl.control_order_dates_equal_period_date(period, DateStart) == False:
             return False
 
 
