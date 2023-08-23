@@ -123,6 +123,101 @@ class Precon():
             return self.formatted_final_response
 
 
+    def meter_data_oiz_main_meter_data(self,
+                       period:tuple = None,
+                       version:tuple = None, 
+                       meterIds:list = [],
+                       readStatus=True,
+                       isRetrospective = False,
+                       meterReadingCompany:int = None,
+                       organizedIndustrialZone:int = None,
+                       meterReadingType:str = None,
+                       usageType:str = None,
+                       region="TR1",
+                       function = "list"):
+        """
+        OSB Ana Sayaç
+        ---------
+        Organize Sanayi Bölgelerine ait ana sayaçların veriş-çekiş değerlerini döner.
+
+        Parametre 
+        ---------
+         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - meterIds            : [] (Varsayılan: None - Hepsi Gelir)
+         - readStatus          : True (Varsayılan: True - Okunmuşlar gelir)
+         - isRetrospective     : False (Varsayılan: False - Hepsi Gelir)
+         - meterReadingCompany : 650 (Varsayılan None - Hepsi Gelir)
+            - meterReadingCompany => {650: 2. Bölge Müdürlüğü - İletim}
+         - organizedIndustrialZone : 123456789 (Varsayılan None - Hepsi Gelir)
+         - meterReadingType    : "HOURLY", "THREE_PHASE", "SINGLE_PHASE" (Varsayılan None - Hepsi Gelir)
+         - usageType           : 3 (Varsayılan None - Hepsi Gelir)
+            - usageType => {
+                1: Trafo Merkezi,
+                2: Serbest Tüketici (Normal)
+                3: Serbest Tüketici (Talep Birleştirme)
+                4: Üretim Şirketi,
+                5: Otop. Üretim Tesisi,
+                6: Otop. Tüketim Tesisi,
+                8: Tüketim Sayacı,
+                9: Teiaş İç İhtiyaç,
+                10: İthalat-İhracat}
+         - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
+        
+        Notlar
+        ---------
+         - version >= period olmalıdır.
+
+        """
+
+        if period == None:
+            period= TimeFormat.current_settlement_date()
+        else:
+            period= TimeFormat.get_settlement_date(period)
+            if period == False:
+                return
+            
+        if isRetrospective == False:
+            if version == None:
+                version= TimeFormat.current_settlement_date()
+            else:
+                version= TimeFormat.get_settlement_date(version)
+                if version == False:
+                    return
+
+        if isRetrospective == False:
+            if TimeFormatControl.control_order_period_version_equal(period, version) == False:
+                return False
+
+
+        if function == "list":
+            path = "https://epys.epias.com.tr/pre-reconciliation/v1/meter-data/main-meter/list"
+        elif function == "export":
+            path = "https://epys.epias.com.tr/pre-reconciliation/v1/meter-data/main-meter/export"
+        else:
+            print("Function is not defined")
+            return
+                    
+        self.request_data(path, {
+            "period":period,
+            "version":version,
+            "organization": self.organizationId,
+            "meterIds":meterIds,
+            "readStatus":readStatus,
+            "isRetrospective" : isRetrospective,
+            "meterReadingCompany":meterReadingCompany,
+            "organizedIndustrialZone": organizedIndustrialZone,
+            "meterReadingType":meterReadingType,
+            "usageType":usageType,
+            "region":region,
+            "page": {'number': self.page, 'size': 10000}})
+
+        
+        if self.final_response != None:
+            self.formatted_final_response = self.format_files_precon(function)
+            return self.formatted_final_response
+
+
 
     def meter_data_approved_meter_data_period(self,
                                               meterId:int,
