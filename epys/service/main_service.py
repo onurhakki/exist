@@ -7,10 +7,11 @@ from data.imbalance import Imbalance
 from data.bpm import Bpm
 from data.res import RES
 from data.rbs import RBS
+from data.kopi import KOPI
 
 from service.tgt import RequestFunctions
 
-class WebService(RequestFunctions, MOF, Market, Precon, Invoice, Imbalance, Bpm, RES, RBS): #, 
+class WebService(RequestFunctions, MOF, Market, Precon, Invoice, Imbalance, Bpm, RES, RBS, KOPI): #, 
     def __init__(self, username, organizationId):
         """
         
