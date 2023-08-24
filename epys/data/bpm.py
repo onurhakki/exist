@@ -38,16 +38,21 @@ class Bpm():
             region = "TR1",
             function = "list"):
         """
+        #BPM
         EAK (Emre Amade Kapasite)
         ---------
         Saatlik kırılımda EAK listesini döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dgp-operations/ac-list
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -60,14 +65,14 @@ class Bpm():
         if DateStart == None:
             DateStart= TimeFormat.current_settlement_date_start()
         else:
-            DateStart= TimeFormat.get_settlement_date_day(DateStart)
+            DateStart= TimeFormat.get_settlement_date_hour(DateStart)
             if DateStart == False:
                 return
             
         if DateEnd == None:
             DateEnd= TimeFormat.current_settlement_date_end()
         else:
-            DateEnd= TimeFormat.get_settlement_date_day(DateEnd)
+            DateEnd= TimeFormat.get_settlement_date_hour(DateEnd)
             if DateEnd == False:
                 return
             
@@ -109,16 +114,21 @@ class Bpm():
             region = "TR1",
             function = "list"):
         """
+        #BPM
         KGÜP (Kesinleşmiş Gün Öncesi Üretim/Tüketim Programı)
         ---------
         Saatlik kırılımda KGÜP listesini döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dgp-operations/fdgs-list
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -131,14 +141,14 @@ class Bpm():
         if DateStart == None:
             DateStart= TimeFormat.current_settlement_date_start()
         else:
-            DateStart= TimeFormat.get_settlement_date_day(DateStart)
+            DateStart= TimeFormat.get_settlement_date_hour(DateStart)
             if DateStart == False:
                 return
             
         if DateEnd == None:
             DateEnd= TimeFormat.current_settlement_date_end()
         else:
-            DateEnd= TimeFormat.get_settlement_date_day(DateEnd)
+            DateEnd= TimeFormat.get_settlement_date_hour(DateEnd)
             if DateEnd == False:
                 return
             
@@ -181,16 +191,22 @@ class Bpm():
             region = "TR1",
             function = "list"):
         """
+        #BPM
         DGP Talimatları
         ---------
         Saatlik kırılımda DGP Talimatlarının listesini döner.
+        
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dgp-operations/instruction-list
+
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -203,14 +219,14 @@ class Bpm():
         if DateStart == None:
             DateStart= TimeFormat.current_settlement_date_start()
         else:
-            DateStart= TimeFormat.get_settlement_date_day(DateStart)
+            DateStart= TimeFormat.get_settlement_date_hour(DateStart)
             if DateStart == False:
                 return
             
         if DateEnd == None:
             DateEnd= TimeFormat.current_settlement_date_end()
         else:
-            DateEnd= TimeFormat.get_settlement_date_day(DateEnd)
+            DateEnd= TimeFormat.get_settlement_date_hour(DateEnd)
             if DateEnd == False:
                 return
             
@@ -258,19 +274,24 @@ class Bpm():
                                 function = "list"):
         
         """
+        #BPM
         DGP Uzlaştırma Detay
         ---------
-        DGP Uzlaştırma detaylarının listesini döner.
-        (DGP Uzlaştırma Detay Sayfası) 
+        DGP Uzlaştırma detaylarını santral ve UEVÇB bazında saatlik kırılımda döner.
+        (DGP Uzlaştırma Detay Sayfası)
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dgp-operations/bpm-settlement-detail
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - versions            : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -365,18 +386,23 @@ class Bpm():
                                                 function = "list"):
         
         """
-        Yerine Getirilmeyen Talimat Detay Listeleme
+        #BPM
+        Yerine Getirilmeyen Talimat Detay
         ---------
-        Yerine Getirilmeyen Talimat detaylarının listesini döner.
+        Yerine Getirilmeyen Talimat detaylarını saatlik kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dgp-operations/unfulfilled-instruction-list
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - versions            : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -471,17 +497,21 @@ class Bpm():
                                     function = "list"):
         
         """
+        #BPM
         DGP Uzlaştırma
         ---------
-        Organizasyonun DGP Uzlaştırma listesini döner.
-        (DGP Uzlaştırma Sayfası) 
+        Organizasyona ait DGP Uzlaştırmasını saatlik kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dgp-operations/bpm-settlement
 
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - versions            : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -577,18 +607,23 @@ class Bpm():
                             function = "list"):
         
         """
+        #BPM
         KÜPST (Kesinleşmiş Üretim Planından Sapma Tutarı)
         ---------
-        KÜPST Detay detaylarının listesini döner.
+        KÜPST Detay detaylarını santral ve UEVÇB bazında saatlik kırılımda döner.
+        
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dgp-operations/kupst-detail
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - versions            : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -683,23 +718,29 @@ class Bpm():
                                         function = "list"):
         
         """
+        #BPM
+        #GDDK
         DGP GDDK
         ---------
         DGP GDDK detaylarının listesini döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/bpm-retro
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
         ---------
-         - version >= period olmalıdır.
+         - version > period olmalıdır.
          - DateEnd >= DateStart olmalıdır.
          - DateStart >= period olmalıdır.
 
@@ -787,23 +828,29 @@ class Bpm():
                                             function = "list"):
         
         """
+        #BPM
+        #GDDK
         KUPST GDDK
         ---------
         KUPST GDDK detaylarının listesini döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/kupst-retro
 
         Parametre 
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
         ---------
-         - version >= period olmalıdır.
+         - version > period olmalıdır.
          - DateEnd >= DateStart olmalıdır.
          - DateStart >= period olmalıdır.
 
@@ -888,14 +935,19 @@ class Bpm():
             DateEnd:tuple = None, 
             function = "list"):
         """
+        #BPM
         SMF (Sistem Marjinal Fiyatı)
         ---------
         Saatlik kırılımda SMF bilgilerini döner.
 
+        İlgili Sayfa
+        ---------
+        Yok.
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function: "list" (Varsayılan: "list" | list ile dict formatında dönüş sağlar)
         
         Notlar

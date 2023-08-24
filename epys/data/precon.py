@@ -43,14 +43,19 @@ class Precon():
                        region="TR1",
                        function = "list"):
         """
+        #Precon
         Onaylı Sayaç Verisi
         ---------
         Onaylı sayaçların sayaç okunma durumlarına göre verilerini döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/data-operation/approved-meter-data
+
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - meterIds            : [] (Varsayılan: None - Hepsi Gelir)
          - readStatus          : True (Varsayılan: True - Okunmuşlar gelir)
          - isRetrospective     : False (Varsayılan: False - Hepsi Gelir)
@@ -136,14 +141,19 @@ class Precon():
                        region="TR1",
                        function = "list"):
         """
+        #Precon
         OSB Ana Sayaç
         ---------
         Organize Sanayi Bölgelerine ait ana sayaçların veriş-çekiş değerlerini döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/data-operation/oiz-main-meter-data
+
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - meterIds            : [] (Varsayılan: None - Hepsi Gelir)
          - readStatus          : True (Varsayılan: True - Okunmuşlar gelir)
          - isRetrospective     : False (Varsayılan: False - Hepsi Gelir)
@@ -225,15 +235,20 @@ class Precon():
                                               version:tuple = None,
                                               function = "list"):
         """
+        #Precon
         Saatlik Sayaç Verileri
         ---------
         Sisteme yüklenen saatlik sayaçların verilerini döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/data-operation/approved-meter-data
+
         Parametre 
         ---------
          - meterId             : (Zorunlu)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -287,14 +302,19 @@ class Precon():
                                               DateEnd:tuple = None,
                                               function = "list"):
         """
+        #Precon
         Saatlik Sayaç Verileri Detay
         ---------
         Sisteme yüklenen saatlik sayaçların verilerinin tamamını saatlik kırılımda döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/data-operation/approved-meter-data
+
         Parametre 
         ---------
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında dönüş sağlar)
                 
         Notlar
@@ -345,22 +365,25 @@ class Precon():
                                               version:tuple = None,
                                               function = "list"):
         """
-        !!!! - WARNING - !!!!!! Versiyon tutulmuyor olabilir / ORganizasyon bilgisine ihtiyaç duyulmuyor
-
+        #Precon
         Toplam Onaylı Sayaç Verileri
         ---------
         Organizasyonun toplam aylık veriş, çekiş ve tenzil değerlerini döner.
 
+        İlgili Sayfa
+        ---------
+        Yok.
+
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında dönüş sağlar)
                 
         Notlar
         ---------
          - version >= period olmalıdır.
-         - Versiyon bulunmamaktadır.
+         - Versiyon bulunmamaktadır. - Kontrol Edilmeli!
 
         """
 
@@ -406,22 +429,26 @@ class Precon():
                                                                version:tuple = None,
                                                                function = "list"):
         """
+        #Precon
         Profil Sayaç Katsayı Detayları
         ---------
         Sayaç katsayı detaylarını döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/data-operation/approved-meter-data
+
         Parametre 
         ---------
          - meterId             : (Zorunlu)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
         ---------
          - version >= period olmalıdır.
-         - Versiyon bulunmamaktadır.
-
+         - Versiyon bulunmamaktadır. - Kontrol Edilmeli!
         
         """
 
@@ -470,15 +497,20 @@ class Precon():
                                                    version:tuple = None,
                                                    function = "list"):
         """
+        #Precon
         Üç veya Tek Zamanlı Sayaç Veri Detayları
         ---------
         Üç veya Tek Zamanlı sayacın detay verilerini aylık kırlımda döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/data-operation/approved-meter-data
+
         Parametre 
         ---------
          - meterId             : (Zorunlu)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında dönüş sağlar)
                 
         Notlar
@@ -529,14 +561,19 @@ class Precon():
                                                version:tuple = None,
                                                function = "list"):                                              
         """
+        #Precon
         Üç veya Tek Zamanlı Sayaç Veri Detay
         ---------
         Üç veya Tek Zamanlı sayacın detay verilerini aylık kırılımda döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/data-operation/approved-meter-data
+
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -593,17 +630,22 @@ class Precon():
                               region = "TR1",
                               function = "list"):
         """
+        #Precon
         UEVÇB Verileri Listeleme
         ---------
         UEVÇB verilerini döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/reports/uevcb-data
+
         Parametre 
         ---------
          - settlementPointId   : None (Tamamı gelir)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -695,15 +737,20 @@ class Precon():
                                     region = "TR1",
                                     function = "list"):                                              
         """
+        #Precon
         UEVÇB'ye Bağlı Sayaçların Bilgileri
         ---------
         UEVÇB'ye Bağlı Sayaçların Veriş-Çekiş Değerlerini listesini döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/reports/uevcb-meter-data
+
         Parametre 
         ---------
          - meterId             : (Zorunlu)
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - isDeduction         : Tenzil durumu (False)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 

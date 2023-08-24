@@ -30,13 +30,18 @@ class Invoice():
                        period:tuple = None,
                        function = "list"):
         """
-        Aylık Uzlaştırma Bildirimi
+        #Invoice
+        Uzlaştırma Bildirimi
         ---------
-        Aylık uzlaştırma bildirimini döner.
+        Aylık uzlaştırma bildirimini fatura kalemi kırılımında döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/settlement-notification
 
         Parametre 
         ---------
-         - period: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)         
+         - period: (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)         
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -71,13 +76,18 @@ class Invoice():
                                              period:tuple = None,
                                              function = "list"):
         """
-        Fatura Bildirimi
+        #Invoice
+        Fatura Kalemleri
         ---------
-        Faturaya esas kalemlerinin tutarlarını döner.
+        Faturaya esas kalemlerinin tutarlarını KDV dahil fatura kalemi kırılımında döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/invoice-items
 
         Parametre 
         ---------
-         - effectiveDate: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period       : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function     : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -115,13 +125,19 @@ class Invoice():
                                      period:tuple = None,
                                      function = "list"):
         """
+        #Invoice
+        #GDDK
         Dönemlik GDDK Bildirimi
         ---------
-        Dönemlik GDDK tutarlarını döner.
+        Dönemlik GDDK tutarlarını alacak-borç olarak uzlaştırma ayı ve fatura kalemi kırılımında döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/monthly-retro
 
         Parametre 
         ---------
-         - effectiveDate: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period       : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function     : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar

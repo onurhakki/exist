@@ -30,76 +30,24 @@ class Market():
         result = self.final_response.json()["body"]["content"]['marketClearingPrices']
         return result
 
-    def advance_detail(self,
-                       DateStart:tuple = None,
-                       DateEnd:tuple = None, function = "list"):
-        """
-        (WARNING - Kaldırılabilir)
-
-        Avans Bildirim Detayları
-        ---------
-        Organizasyonların avans alacak borç detaylarını döner.
-
-        Parametre 
-        ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)         
-         - DateEnd  : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - function : "list" (Varsayılan: "list" | list ile dict formatında dönüş sağlar)
-        
-        Notlar
-        ---------
-         - Ödeme tarihleri kullanılmıştır.
-         - DateEnd > DateStart olmalıdır.
-         - Maksimum bir senelik veri çekilebilmektedir.
-        """
-
-        if DateStart == None:
-            DateStart= TimeFormat.current_settlement_date_start()
-        else:
-            DateStart= TimeFormat.get_settlement_date_day(DateStart)
-            if DateStart == False:
-                return
-            
-        if DateEnd == None:
-            DateEnd= TimeFormat.current_settlement_date_end()
-        else:
-            DateEnd= TimeFormat.get_settlement_date_day(DateEnd)
-            if DateEnd == False:
-                return
-            
-        if TimeFormatControl.control_order_dates_equal(DateStart, DateEnd) == False:
-            return False
-
-
-        if function == "list":
-            path = "https://epys.epias.com.tr/reconciliation-market/v1/advance/detail/list"
-        else:
-            print("Function is not defined")
-            return
-                    
-        self.request_data(path, {
-            "paymentDateStart": DateStart,
-            "paymentDateEnd": DateEnd,
-            "page": {'number': self.page, 'size': 10000}})
-
-        
-        if self.final_response != None:
-            self.formatted_final_response = self.format_files_market(function)
-            return self.formatted_final_response
-
 
     def advance(self,
                 DateStart:tuple = None,
                 DateEnd:tuple = None, function = "list"):
         """
+        #Market
         Avans Bildirim Detayları
         ---------
-        Organizasyonların avans alacak borç detaylarını döner.
-
-        Parametre 
+        Organizasyonların avans alacak borç detaylarını günlük kırlımda döner.
+        
+        İlgili Sayfa
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)         
-         - DateEnd  : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+        https://epys.epias.com.tr/reconciliation-operations/advance-detail
+
+        Parametre
+        ---------
+         - DateStart: (2023,1,1) (Varsayılan: Güncel uzlaştırma periyotu)         
+         - DateEnd  : (2023,1,31) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -151,14 +99,19 @@ class Market():
                            DateEnd:tuple = None,
                            function = "list"):
         """
+        #Market
         İkili Anlaşma
         ---------
-        Uzlaştırma dönemi bazında günlük toplam ikili anlaşma alış-satış miktarlarını döner.
+        Uzlaştırma dönemi bazında günlük toplam ikili anlaşma alış-satış miktarlarını saatlik kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/bilateral-agreement-operations/bilateral-contract
 
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -211,14 +164,19 @@ class Market():
                                   targetOrganizationId:int = None, 
                                   function = "list"):
         """
+        #Market
         İkili Anlaşma Detayları
         ---------
-        Uzlaştırma dönemi bazında günlük toplam ikili anlaşma alış-satış miktarlarını seçilen organizasyon detaylarını döner.
+        Uzlaştırma dönemi bazında günlük toplam ikili anlaşma alış-satış miktarlarını seçilen organizasyon detaylarını saatlik kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/bilateral-agreement-operations/bilateral-contract-detail
 
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd: (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - targetOrganizationId: None (Varsayılan: None | ikili anlaşma yapılan organizasyonları id'si girelebilir)
          - function: "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
@@ -273,14 +231,19 @@ class Market():
                            region = "TR1",
                            function = "list"):
         """
+        #Market
         Gün Öncesi Piyasası(GÖP) Uzlaştırma Detay Bildirimi
         ---------
         Organizasyonların GÖP'de yapmış oldukları eşleşme detaylarını saatlik kırılımda döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dam-operations/dam-settlement-detail
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd: (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function: "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -293,14 +256,14 @@ class Market():
         if DateStart == None:
             DateStart= TimeFormat.current_settlement_date_start()
         else:
-            DateStart= TimeFormat.get_settlement_date_day(DateStart)
+            DateStart= TimeFormat.get_settlement_date_hour(DateStart)
             if DateStart == False:
                 return
             
         if DateEnd == None:
             DateEnd= TimeFormat.current_settlement_date_end()
         else:
-            DateEnd= TimeFormat.get_settlement_date_day(DateEnd)
+            DateEnd= TimeFormat.get_settlement_date_hour(DateEnd)
             if DateEnd == False:
                 return
             
@@ -334,14 +297,19 @@ class Market():
                            region = "TR1",
                            function = "list"):
         """
+        #Market
         Gün Öncesi Piyasası(GÖP) Uzlaştırma Bildirimi
         ---------
         Organizasyonların GÖP'de yapmış oldukları eşleşme detaylarını günlük kırılımda döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dam-operations/dam-settlement
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd: (2023,1,31) (Varsayılan: Güncel uzlaştırma periyotu)
          - function: "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -396,14 +364,19 @@ class Market():
                            region = "TR1",
                            function = "list"):
         """
+        #Market
         Gün Öncesi Piyasası(GÖP) Fark Tutarı
         ---------
-        Organizasyonun gün öncesi piyasasında fark fonu bilgilerini döner.
+        Organizasyonun gün öncesi piyasasında fark fonu bilgilerini günlük kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/dam-operations/dam-settlement-detail
 
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd: (2023,1,31) (Varsayılan: Güncel uzlaştırma periyotu)
          - function: "list" (Varsayılan: "list" | list ile dict formatında dönüş sağlar)
         
         Notlar
@@ -455,14 +428,19 @@ class Market():
                            DateEnd:tuple = None, 
                            function = "list"):
         """
+        #Market
         Gün Öncesi Piyasası(GÖP) Piyasa Takas Fiyatı (PTF)
         ---------
-        Saatlik kırılımda PTF bilgilerini döner.
+        Saatlik kırılımda Piyasa Takas Fiyatı (PTF) bilgilerini saatlik kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        Yok.
 
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd: (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function: "list" (Varsayılan: "list" | list ile dict formatında dönüş sağlar)
         
         Notlar
@@ -514,14 +492,19 @@ class Market():
                            region = "TR1",
                            function = "list"):
         """
+        #Market
         Gün İçi Piyasası(GİP) Uzlaştırma Bildirimi
         ---------
         Organizasyonun gün içi piyasasındaki eşleşme sonuçlarını günlük kırılımda döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/idm-operations/idm-settlement
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd: (2023,1,31) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -575,14 +558,19 @@ class Market():
                            region = "TR1",
                            function = "list"):
         """
+        #Market
         Gün İçi Piyasası(GİP) Uzlaştırma Detay Bildirimi 
         ---------
         Organizasyonun gün içi piyasasındaki eşleşme sonuçlarını saatlik kırılımda döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/idm-operations/idm-settlement-detail
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd: (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar

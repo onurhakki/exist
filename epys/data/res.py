@@ -35,15 +35,14 @@ class RES():
                           region = "TR1",
                           function = "list"):
         """
-
-        !!!
-
-        Export fonksiyonunda bir hata var
-        
-        !!!
+        #RES
         YEK UEVM
         ---------
         Organizasyonların YEKDEM kapsamındaki UEVM'!lerinin Kırpma, kapasite oranı ve YAT talimatına göre verilerini döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resm-operations/resm-uevm
 
         Parametre
         ---------
@@ -53,13 +52,15 @@ class RES():
             - "TRIMMED_GENERATION"
             - "CAPACITY_RATIO"
             - "DOWN_REGULATION" 
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
         ---------
          - version >= period olmalıdır.
+         - Export fonksiyonunda header'da 'Accept': 'application/octet-stream'.
+
         """
         if period == None:
             period= TimeFormat.current_settlement_date()
@@ -94,8 +95,8 @@ class RES():
             "settlementPointId":settlementPointId,
             "category": category,
             "region": region, 
-
-            "page": {'number': self.page, 'size': 10000}})
+            "page": {'number': self.page, 'size': 10000}}, 
+            octet = False if function == "list" else True)
 
                                  
         if self.final_response != None:
@@ -111,14 +112,19 @@ class RES():
                        powerPlantTypes:list = [],
                        function = "list"):
         """
+        #RES
         YEK TL Birim Fiyatları
         ---------
         YEK TL Birim Fiyatları döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resm-operations/resm-unit-price-tlkwh
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - powerPlantTypes: [] (Boş iken tamamı gelir)
             - "BIOMASS_BIOMETHANATION"
             - "BIOMASS_LANDFILL_GAS"
@@ -187,14 +193,19 @@ class RES():
                        DateEnd:tuple = None,
                        function = "list"):
         """
+        #RES
         YEKDEM TL Hesaplama Verileri
         ---------
         YEKDEM TL Hesaplama Verileri döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resm-operations/resm-unit-price-tlkwh
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -248,13 +259,18 @@ class RES():
                             region = "TR1",
                             function = "list"):
         """
+        #RES
         LÜY Fatura
         ---------
         Lisanssız üretim yapan UEVCB'lere ait faturaları listeler.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resm-operations/upr-amount-operations
+
         Parametre 
         ---------
-         - period: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - settlementPointId   : None (Tamamı gelir)       
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
@@ -297,15 +313,19 @@ class RES():
                           region = "TR1",
                           function = "list"):
         """
-
+        #RES
         YEK Uzlaştırma
         ---------
         Organizasyonların YEK kapsamındaki alacak ve ödeme tutarlarını döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resm-operations/resm-settlement
+
         Parametre
         ---------
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - versions: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -360,17 +380,21 @@ class RES():
                                   region = "TR1",
                                   function = "list"):
         """
-
-        YEK UEVM Uzlaştırma
+        #RES
+        YEK Uzlaştırma Detay
         ---------
         Organizasyonların YEKDEM kapsamındaki UEVM'lerinin detay kırılımını döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resm-operations/resm-settelement-details
 
         Parametre
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -423,15 +447,20 @@ class RES():
                           version:tuple = None,
                           function = "list"):
         """
-
+        #RES
+        #GDDK
         YEKDEM GDDK
         ---------
         YEKDEM GDDK döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/resm-retro
+
         Parametre
         ---------
-         - periodList : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -477,7 +506,7 @@ class RES():
 
 
 
-    def payment_obligation_detail(self,
+    def retro_payment_obligation_detail(self,
                                   powerPlantId:int = None,
                                   settlementPointId:int = None,
                                   period:tuple = None,
@@ -485,17 +514,22 @@ class RES():
                                   region = "TR1",
                                   function = "list"):
         """
-
-        YEKDEM GDDK
+        #RES
+        #GDDK
+        YEKDEM GDDK Detay
         ---------
         YEKDEM GDDK döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/resm-retro-details
 
         Parametre
         ---------
          - powerPlantId        : None (Tamamı gelir)
          - settlementPointId   : None (Tamamı gelir)
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar

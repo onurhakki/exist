@@ -34,16 +34,21 @@ class Imbalance():
                               region = "TR1",
                               function = "list"):
         """
-        Organizasyon Enerji Dengesizlik
+        #Imbalance
+        Dengesizlik Uzlaştırma
         ---------
-        Organizasyonların saatlik detayda dengesizlik detaylarını döner. (EPYS ekranlarındaki "Dengesizlik Uzlaştırma" sayfasını döner)
+        Organizasyonların saatlik detayda dengesizlik detaylarını döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/imbalance-operations/imbalance-settlement
 
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -131,16 +136,21 @@ class Imbalance():
                               region = "TR1",
                               function = "list"):
         """
-        DSG Enerji Dengesizlik Detay
+        #Imbalance
+        Dengesizlik Uzlaştırma Detay
         ---------
         Dengeden sorumlu grup üyelerinin enerji dengesizlik bilgilerinin detaylarını döner. (EPYS ekranlarındaki "Dengesizlik Uzlaştırma Detay" sayfasını dışarı aktarıldığında elde edilen excel sayfasındaki verileri döner.)
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/imbalance-operations/imbalance-settlement-detail
+
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -225,6 +235,7 @@ class Imbalance():
                                                             region = "TR1",
                                                             function = "list"):
         """
+        #Imbalance
         DSG Enerji Dengesizlik Aylık Detay
         ---------
         Dengeden sorumlu grup üyelerinin aylık enerji dengesizlik bilgilerinin detaylarını döner. 
@@ -233,10 +244,14 @@ class Imbalance():
             export: EPYS ekranlarındaki "Dengesizlik Uzlaştırma Detay" sayfasını dışarı aktarıldığında elde edilen excel sayfasındaki verileri döner.
         )
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/imbalance-operations/imbalance-settlement-detail
+
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
@@ -291,21 +306,27 @@ class Imbalance():
                               region = "TR1",
                               function = "list"):
         """
+        #Imbalance
+        #GDDK
         DSG GDDK Enerji Dengesizlik Detay
         ---------
         DSG üyelerinin aylık GDDK değişimlerine ait dengesizlik bilgilerinin detaylarını döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/imbalance-retro
+
         Parametre 
         ---------
-         - period              : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version             : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateStart           : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd             : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
                 
         Notlar
         ---------
-         - version >= period olmalıdır.
+         - version > period olmalıdır.
          - DateEnd >= DateStart olmalıdır.
          - DateStart >= period olmalıdır.
 

@@ -33,10 +33,14 @@ class RBS():
                 function = "list"):
                           
         """
-
+        #RBS
         Azami Uzlaştırma Fiyatı (AUF)
         ---------
         ...
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resource-based-support-operations/maximum-settlement-price-msp
 
         Parametre
         ---------
@@ -62,8 +66,8 @@ class RBS():
             - 53: Proses Atık Isısı
             - 54: Asfaltit
             - 141: Rezervuarli + Kanal Tipi
-         - DateStart : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -116,18 +120,22 @@ class RBS():
                        version:tuple = None,
                        function = "list"):
         """
-
+        #RBS
         Kaynak Bazında Destekleme Uzlaştırma
         ---------
         Organizasyonların Kaynak Bazında Destekleme Uzlaştırma alacak ve ödeme tutarlarını döner.
 
         Export fonksiyonu ile saatlik kırılım detayı da gelmektedir.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resource-based-support-operations/resource-based-support-settlement
+
         Parametre
         ---------
          - powerPlantId        : None (Tamamı gelir)
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -178,15 +186,19 @@ class RBS():
                                     version:tuple = None,
                                     function = "list"):
         """
-
+        #RBS
         Kaynak Bazında Destekleme Uzlaştırma - GTŞ
         ---------
         Organizasyonların Kaynak Bazında Destekleme Uzlaştırma alacak ve ödeme tutarlarını döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/resource-based-support-operations/resource-based-support-settlementars
+
         Parametre
         ---------
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -243,16 +255,21 @@ class RBS():
                           version:tuple = None,
                           function = "list"):
         """
-
+        #RBS
+        #GDDK
         Kaynak Bazında Destekleme Uzlaştırma GDDK
         ---------
         Kaynak Bazında Destekleme Uzlaştırma GDDK döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/resource-based-support-settlement-retro
+
         Parametre
         ---------
          - powerPlantId        : None (Tamamı gelir)
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -304,15 +321,20 @@ class RBS():
                                        version:tuple = None,
                                        function = "list"):
         """
-
+        #RBS
+        #GDDK
         Kaynak Bazında Destekleme Uzlaştırma - GTŞ GDDK
         ---------
         Kaynak Bazında Destekleme Uzlaştırma - GTŞ GDDK döner.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/resource-based-support-ars-retro
+
         Parametre
         ---------
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period   : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version  : (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar

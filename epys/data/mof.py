@@ -31,14 +31,19 @@ class MOF():
                                         version:tuple = None, 
                                         function = "list"):
         """
+        #MOF
         Dönemlik Organizasyon Piyasa İşletim Ücreti (PİÜ) Detayı
         ---------
-        Organizasyonların dönemlik PİÜ'larını döner.
+        Organizasyonların dönemlik PİÜ'larını günlük kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/market-operation-fee
 
         Parametre 
         ---------
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version: (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
@@ -87,14 +92,20 @@ class MOF():
                                         period:tuple = None, 
                                         version:tuple = None, function = "list"):
         """
+        #MOF
+        #GDDK
         (GDDK) Dönemlik Organizasyon Piyasa İşletim Ücreti (PİÜ) Detayı
         ---------
-        Organizasyonların GDDK kapsamında dönemlik PİÜ'larını döner.
+        Organizasyonların GDDK kapsamında dönemlik PİÜ'larını günlük kırılımda döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/retro-operations/mof-retro
 
         Parametre 
         ---------
-         - period : "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - version: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - period : (2023,1) (Varsayılan: Güncel uzlaştırma periyotu)
+         - version: (2023,2) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar

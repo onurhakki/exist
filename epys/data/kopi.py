@@ -32,14 +32,19 @@ class KOPI():
                    objectionStatus:str = None,
                    function = "list"):
         """
-        KOPİ (Karşılığı olmayan piyasa işlemleri) İtirazlar
+        #KOPİ
+        KOPİ (Karşılığı Olmayan Piyasa İşlemleri) İtirazlar
         ---------
-        KOPİ itirazi listeleme.
+        KOPİ itirazlarını döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/unrequited-market-transactions/objections
 
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)         
-         - DateEnd  : "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1) (Varsayılan: Güncel uzlaştırma periyotu)         
+         - DateEnd  : (2023,1,31) (Varsayılan: Güncel uzlaştırma periyotu)
          - objectionStatus: None (Tamamı gelir)
             - "REJECTED",
             - "ACCEPTED",
@@ -99,6 +104,7 @@ class KOPI():
                            advanceBlockingStatuses:list = ["BLOCKED","UNBLOCKED","NO_BLOCK"],
                            function = "list"):
         """
+        #KOPİ
         KOPİ Kontrol İşlemleri
         ---------
         KOSM𝑝,𝑠 = (VEPSM𝑝,𝑠 + GÖPVTSM𝑝,𝑠 + GİPVTSM𝑝,𝑠 + GÖPSSM𝑝,𝑠 + GİPSM𝑝,𝑠 + İASM𝑝,𝑠 ) 
@@ -106,12 +112,14 @@ class KOPI():
         
         Karşılığı Olmayan Satış Miktarı; "Negatif" ise açığa satış yok, "Pozitif" ise açığa satış var.
 
-
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/unrequited-market-transactions/control-operations
 
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - advanceBlockingStatuses: ["BLOCKED","UNBLOCKED","NO_BLOCK"] (Varsayılan)
          - sanctionStatus:
           - "ACTIVE",
@@ -172,16 +180,21 @@ class KOPI():
                            DateEnd:tuple = None,
                            function = "list"):
         """
+        #KOPİ
         KOPİ Kontrol İşlemleri
         ---------
         "*" ile başlayan yaptırım tarihi katılımcıların ihlal durumları kesinleşmemiştir. GİP Ticaretinin bitişinden sonra kesinleşecektir.
 
         "**" ile işaretlenmiş Avans Bloke Yaptırım Tutarı yaptırım tarihinde kesinleşecektir.
 
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/unrequited-market-transactions/control-operations
+
         Parametre 
         ---------
-         - DateStart: "2023-01-01T00:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
-         - DateEnd: "2023-01-31T23:00:00+03:00" (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateStart: (2023,1,1,0) (Varsayılan: Güncel uzlaştırma periyotu)
+         - DateEnd  : (2023,1,31,23) (Varsayılan: Güncel uzlaştırma periyotu)
          - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
         
         Notlar
