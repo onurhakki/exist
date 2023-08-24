@@ -50,11 +50,17 @@ class RequestFunctions():
             return True
         
 
-    def request_data(self, path, payload):
-        service_header ={
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            "TGT": self.tgt_response}
+    def request_data(self, path, payload, octet = False):
+        if octet == False:
+            service_header ={
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                "TGT": self.tgt_response}
+        else:
+            service_header ={
+                'Content-Type': 'application/json',
+                'Accept': 'application/octet-stream',
+                "TGT": self.tgt_response}
 
         if self.organizationId != None:
             service_header["mockedOrganizationId"] = str(self.organizationId)
@@ -71,7 +77,3 @@ class RequestFunctions():
         else:
             print("No valid Org ID")
             self.final_response = None
-
-        
-
-
