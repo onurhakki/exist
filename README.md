@@ -27,6 +27,21 @@ ws = WebServiceTransparency()
 ws.dam.mcp(startDate=(2023, 12, 1), endDate=(2023, 12, 31), function = "export")
 ```
 
+### usage - (example: Market Clearing Price (MCP))
+
+##### 2023 MCP hourly averages on monthly basis
+
+In the [Notebook](https://github.com/onurhakki/exist/blob/main/example-notebooks/EPYS%20WebService%20.ipynb), you can access example details.
+
+![mcp_2023](https://github.com/onurhakki/exist/assets/53830179/54c7390c-cc11-4230-9e40-ceda4a1f0592)
+
+### usage - (example: System's Direction)
+
+##### 2023 System's Direction averages on monthly basis
+
+In the [Notebook](https://github.com/onurhakki/exist/blob/main/example-notebooks/EPYS%20WebService%20.ipynb), you can access example details.
+
+![direction_2023](https://github.com/onurhakki/exist/assets/53830179/8f19d58e-344e-4253-aa69-8217f1b84113)
 
 ## EPYS (Enerji Piyasaları Yönetim Sistemi) - EMMS (Energy Markets Management System)
 
