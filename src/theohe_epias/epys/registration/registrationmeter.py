@@ -20,7 +20,8 @@ class RegistrationMeter():
                 "TGT": self.tgt_response}
 
         if self.organizationId != None:
-            service_header["mockedOrganizationId"] = str(self.organizationId)
+            if self.organizationId != 2:
+                service_header["mockedOrganizationId"] = str(self.organizationId)
             payload = dumps(payload)
             final_response = request(
                 "POST", path, headers=service_header, data=payload, 
