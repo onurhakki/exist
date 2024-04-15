@@ -1,8 +1,8 @@
 import requests
 import pandas as pd
 
-from theohe_epias.transparency.utils.get_time import get_today, get_yesterday
-from theohe_epias.transparency.utils.time_format import tuple_to_datetime
+from ...transparency.utils.get_time import get_today, get_yesterday
+from ...transparency.utils.time_format import tuple_to_datetime
 
 class Reports():
     def __init__(self):

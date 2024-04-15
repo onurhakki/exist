@@ -1,6 +1,6 @@
 [project]
 name = "theohe-epias"
-version = "0.0.7"
+version = "0.0.9"
 authors = [
   { name="Onur Hakkı Eyüboğlu", email="eyubogluo@itu.edu.tr" },
 ]

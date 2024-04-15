@@ -1,7 +1,7 @@
 
 from pandas import ExcelFile
-from theohe_epias.epys.utils.get_time import get_current_settlement_days, get_last_day_of_month
-from theohe_epias.epys.utils.time_format import tuple_to_datetime, control_times
+from ...epys.utils.get_time import get_current_settlement_days, get_last_day_of_month
+from ...epys.utils.time_format import tuple_to_datetime, control_times
 from json import dumps
 from requests import request
 

@@ -1,8 +1,8 @@
 import requests
 import pandas as pd
 
-from theohe_epias.transparency.utils.get_time import get_today, get_yesterday, get_this_month, get_year
-from theohe_epias.transparency.utils.time_format import tuple_to_datetime
+from ...transparency.utils.get_time import get_today, get_yesterday, get_this_month, get_year
+from ...transparency.utils.time_format import tuple_to_datetime
 
 class BC():
     def __init__(self):

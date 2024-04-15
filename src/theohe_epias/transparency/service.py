@@ -1,19 +1,19 @@
-from theohe_epias.transparency.data.reports import Reports
-from theohe_epias.transparency.data.dam import DAM
-from theohe_epias.transparency.data.idm import IDM
-from theohe_epias.transparency.data.bpm import BPM
-from theohe_epias.transparency.data.ancillary_services import AS
-from theohe_epias.transparency.data.bilateral_contracts import BC
-from theohe_epias.transparency.data.imbalance import IB
-from theohe_epias.transparency.data.general_data import GD
-from theohe_epias.transparency.data.production import Production
-from theohe_epias.transparency.data.consumption import Consumption
-from theohe_epias.transparency.data.renewables import Renewables
-from theohe_epias.transparency.data.transmission import Transmission
-from theohe_epias.transparency.data.dams import Dams
-from theohe_epias.transparency.data.mms import MMS
-from theohe_epias.transparency.data.yekg import YEKG
-from theohe_epias.transparency.data.pfm import PFM
+from ..transparency.data.reports import Reports
+from ..transparency.data.dam import DAM
+from ..transparency.data.idm import IDM
+from ..transparency.data.bpm import BPM
+from ..transparency.data.ancillary_services import AS
+from ..transparency.data.bilateral_contracts import BC
+from ..transparency.data.imbalance import IB
+from ..transparency.data.general_data import GD
+from ..transparency.data.production import Production
+from ..transparency.data.consumption import Consumption
+from ..transparency.data.renewables import Renewables
+from ..transparency.data.transmission import Transmission
+from ..transparency.data.dams import Dams
+from ..transparency.data.mms import MMS
+from ..transparency.data.yekg import YEKG
+from ..transparency.data.pfm import PFM
 
 class WebServiceTransparency():
     def __init__(self):

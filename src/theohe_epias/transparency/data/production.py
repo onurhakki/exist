@@ -1,8 +1,8 @@
 import requests
 import pandas as pd
 
-from theohe_epias.transparency.utils.get_time import get_today, get_year, get_tomorrow, get_current_settlement_fday, get_current_settlement_lday, get_last_year
-from theohe_epias.transparency.utils.time_format import tuple_to_datetime
+from ...transparency.utils.get_time import get_today, get_year, get_tomorrow, get_current_settlement_fday, get_current_settlement_lday, get_last_year
+from ...transparency.utils.time_format import tuple_to_datetime
 
 class Production():
     def __init__(self):

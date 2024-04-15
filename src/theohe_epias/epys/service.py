@@ -1,20 +1,20 @@
 
-from theohe_epias.epys.utils.tgt import RequestFunctions
+from ..epys.utils.tgt import RequestFunctions
 
-from theohe_epias.epys.invoice.data import Invoice
+from ..epys.invoice.data import Invoice
 
-from theohe_epias.epys.reconciliation.settlement import Settlement
-from theohe_epias.epys.reconciliation.reports import Reports
-from theohe_epias.epys.reconciliation.settlementdata import SettlementData
-from theohe_epias.epys.reconciliation.advance import Advance
-from theohe_epias.epys.reconciliation.imbalance import Imbalance
+from ..epys.reconciliation.settlement import Settlement
+from ..epys.reconciliation.reports import Reports
+from ..epys.reconciliation.settlementdata import SettlementData
+from ..epys.reconciliation.advance import Advance
+from ..epys.reconciliation.imbalance import Imbalance
 
 
-from theohe_epias.epys.registration.registrationmeter import RegistrationMeter
+from ..epys.registration.registrationmeter import RegistrationMeter
 
-from theohe_epias.epys.eligible_customer.eligible_customer_meter import EligibleCustomerMeter
+from ..epys.eligible_customer.eligible_customer_meter import EligibleCustomerMeter
 
-from theohe_epias.epys.unlicensed.luytob_control import LUYTOB
+from ..epys.unlicensed.luytob_control import LUYTOB
 
 
 class WebServiceEPYS(
