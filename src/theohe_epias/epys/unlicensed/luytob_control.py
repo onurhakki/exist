@@ -84,12 +84,13 @@ class LUYTOB():
         if period == False:
             return
 
-        version= tuple_to_datetime(version)
-        if version == False:
-            return
+        if version != None:
+            version= tuple_to_datetime(version)
+            if version == False:
+                return
 
-        if control_times(period, version, equal = True, label = "period") == False:
-            return
+            if control_times(period, version, equal = True, label = "period") == False:
+                return
 
         if function == "list":
             path = "https://epys{}.epias.com.tr/reconciliation-unlicensed/v1/luytop-report/list".format(self.test_coef)

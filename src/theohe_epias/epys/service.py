@@ -14,6 +14,7 @@ from theohe_epias.epys.registration.registrationmeter import RegistrationMeter
 
 from theohe_epias.epys.eligible_customer.eligible_customer_meter import EligibleCustomerMeter
 
+from theohe_epias.epys.unlicensed.luytob_control import LUYTOB
 
 
 class WebServiceEPYS(
@@ -21,7 +22,8 @@ class WebServiceEPYS(
     Invoice, 
     Settlement, Reports, SettlementData, Advance, Imbalance,
     RegistrationMeter,
-    EligibleCustomerMeter
+    EligibleCustomerMeter,
+    LUYTOB
     ): 
     def __init__(self, username, organizationId, test = None):
         """
