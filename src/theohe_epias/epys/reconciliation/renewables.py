@@ -104,11 +104,11 @@ class Renewables():
 
         if control_times(period, version, equal = True, label = "period") == False:
             return
-            
+                    
         if function == "list":
-            path = "https://epys{}.epias.com.tr/pre-reconciliation/v1/settlement-point/meter-data/list".format(self.test_coef)
+            path = "https://epys{}.epias.com.tr/reconciliation-res/v1/luy-invoice/invoice/list".format(self.test_coef)
         elif function == "export":
-            path = "https://epys{}.epias.com.tr/pre-reconciliation/v1/settlement-point/meter-data/export".format(self.test_coef)
+            path = "https://epys{}.epias.com.tr/reconciliation-res/v1/luy-invoice/invoice/export".format(self.test_coef)
         else:
             print("Function is not defined")
             return
