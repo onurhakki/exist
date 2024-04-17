@@ -8,6 +8,7 @@ from ..epys.reconciliation.reports import Reports
 from ..epys.reconciliation.settlementdata import SettlementData
 from ..epys.reconciliation.advance import Advance
 from ..epys.reconciliation.imbalance import Imbalance
+from ..epys.reconciliation.renewables import Renewables
 
 
 from ..epys.registration.registrationmeter import RegistrationMeter
@@ -20,7 +21,7 @@ from ..epys.unlicensed.luytob_control import LUYTOB
 class WebServiceEPYS(
     RequestFunctions, 
     Invoice, 
-    Settlement, Reports, SettlementData, Advance, Imbalance,
+    Settlement, Reports, SettlementData, Advance, Imbalance, Renewables,
     RegistrationMeter,
     EligibleCustomerMeter,
     LUYTOB
