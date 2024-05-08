@@ -109,3 +109,45 @@ class LUYTOB():
             return self.formatted_final_response                    
 
 
+    def sktt_price(self,
+                   period:tuple = get_current_settlement_days(first_day = True, finalised = False),
+                   ):
+        """
+        #Unlicensed
+        Abone Grubu ve Tarife İşlemleri
+        ---------
+        SKTT Fiyatları.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/unlicensed-electricity-generation-module-operation/specification-operations/consumer-group-and-tariff-operations?type=skttprices
+
+        Parametre 
+        ---------
+         - period   : (2023,1) (Varsayılan: Güncel KESİNLEŞMEMİŞ (Ayın 6'sından sonra kesinleşmemiş Uzlaştırma çalışır) uzlaştırma dönemi kullanılmaktadır)        
+        """
+
+        period = tuple_to_datetime(period)
+        if period == False:
+            return
+        
+        period_end = get_last_day_of_month(period)
+
+        path = "https://epys{}.epias.com.tr/reconciliation-unlicensed/v1/sktt-price/list".format(self.test_coef)
+
+        
+        self.request_luytob_data(path, {
+            "period": period,
+            "effectiveDateStart": period,
+            "effectiveDateEnd": period_end,
+            "page": {'number': self.page, 'size': 10000}})
+
+                                 
+        if self.final_response != None:
+            self.formatted_final_response = self.format_files_luytob("list")
+            try:
+                return self.formatted_final_response["items"][0]["price"]
+            except:
+                return "Not valid date"
+
+
