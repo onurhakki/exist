@@ -222,3 +222,63 @@ class Reports():
             return self.formatted_final_response
 
 
+    def overproduction_data(self,
+                              period:tuple = get_current_settlement_days(first_day = True, finalised = False),
+                              version:tuple = get_current_settlement_days(first_day = True, finalised = False),
+                              region = "TR1",
+                              function = "list"):
+        """
+        #Precon
+        Kırpma Miktarı
+        ---------
+        Fazla üretim nedeniyle kırpılan üretim verilerini döner.
+
+        İlgili Sayfa
+        ---------
+        https://epys.epias.com.tr/reconciliation-operations/reports/overproduction-data
+
+        Parametre 
+        ---------
+         - settlementPointId   : None (Tamamı gelir)
+         - period   : (2023,1) (Varsayılan: Güncel KESİNLEŞMEMİŞ (Ayın 6'sından sonra kesinleşmemiş Uzlaştırma çalışır) uzlaştırma dönemi kullanılmaktadır)
+         - version  : (2023,1) (Varsayılan: Güncel KESİNLEŞMEMİŞ (Ayın 6'sından sonra kesinleşmemiş Uzlaştırma çalışır) uzlaştırma dönemi kullanılmaktadır)
+         - function : "list","export" (Varsayılan: "list" | list ile dict formatında, export ile dataframe veya dict olarak dönüş sağlar)
+                
+        Notlar
+        ---------
+         - Eğer DateEnd veya DateStart parametre olarak giriliyorsa, period seçilmelidir. versiyon olarak en güncel dönem gelecektir.
+         - version >= period olmalıdır.
+         - DateEnd >= DateStart olmalıdır.
+         - DateStart >= period olmalıdır.
+        """
+
+        period= tuple_to_datetime(period)
+        if period == False:
+            return
+
+        version= tuple_to_datetime(version)
+        if version == False:
+            return
+
+        if control_times(period, version, equal = True, label = "period") == False:
+            return
+
+        if function == "list":
+            path = "https://epys{}.epias.com.tr/pre-reconciliation/v1/settlement-point/overproduction-data/list".format(self.test_coef)
+        elif function == "export":
+            path = "https://epys{}.epias.com.tr/pre-reconciliation/v1/settlement-point/overproduction-data/export".format(self.test_coef)
+        else:
+            print("Function is not defined")
+            return
+                    
+        self.request_reports_data(path, {
+            "period":period,
+            "version":version,
+            "region": region, 
+            "page": {'number': self.page, 'size': 10000}})
+
+        
+        if self.final_response != None:
+            self.formatted_final_response = self.format_files_reports(function)
+            return self.formatted_final_response
+

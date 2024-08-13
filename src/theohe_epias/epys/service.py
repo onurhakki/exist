@@ -9,9 +9,11 @@ from ..epys.reconciliation.settlementdata import SettlementData
 from ..epys.reconciliation.advance import Advance
 from ..epys.reconciliation.imbalance import Imbalance
 from ..epys.reconciliation.renewables import Renewables
+from ..epys.reconciliation.bpm import BPM
 
 
 from ..epys.registration.registrationmeter import RegistrationMeter
+from ..epys.registration.organization import Organization
 
 from ..epys.eligible_customer.eligible_customer_meter import EligibleCustomerMeter
 
@@ -21,8 +23,8 @@ from ..epys.unlicensed.luytob_control import LUYTOB
 class WebServiceEPYS(
     RequestFunctions, 
     Invoice, 
-    Settlement, Reports, SettlementData, Advance, Imbalance, Renewables,
-    RegistrationMeter,
+    Settlement, Reports, SettlementData, Advance, Imbalance, Renewables, BPM,
+    RegistrationMeter, Organization,
     EligibleCustomerMeter,
     LUYTOB
     ): 
