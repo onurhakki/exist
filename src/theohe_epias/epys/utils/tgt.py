@@ -46,6 +46,6 @@ class RequestFunctions():
             print(self.tgt_request.text)
             return False
         else:
-            print("Successful login")
+            # print("Successful login")
             return True
         
