@@ -25,11 +25,6 @@ jobs:
           pip install setuptools wheel
       - name: Build package
         run: |
-          pip install virtualenv
-          virtualenv -p /usr/bin/python .venv
-          source .venv/bin/activate
-          pip install -U twine build packaging
-          python -m build
-          twine upload dist/*
+          python setup.py sdist bdist_wheel  # Could also be python -m build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
