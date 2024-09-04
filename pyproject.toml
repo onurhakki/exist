@@ -1,22 +1,6 @@
 [build-system]
 requires = ["setuptools == 68.2.2"]
 
-[project]
-name = "theohe-epias"
-version = "0.0.12"
-authors = [
-  { name="Onur Hakkı Eyüboğlu", email="eyubogluo@itu.edu.tr" },
-]
-description = "Energy Exchange Istanbul (EXIST) or Enerji Piyasaları İşletme A.Ş. (EPİAŞ) by its Turkish name is an energy exchange company."
-readme = "README.md"
-requires-python = ">=3.8"
-dependencies = [
-  "requests",
-  "pandas",
-  "pwinput"
-]
-license = {file = "LICENSE.txt"}
-
 
 
 [project.urls]
