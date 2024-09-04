@@ -9,7 +9,8 @@ NAME = "theohe-epias"
 INSTALL_REQUIRES = [
   "requests",
   "pandas",
-  "pwinput"
+  "pwinput",
+  "setuptools == 68.2.2"
 ]
 
 
