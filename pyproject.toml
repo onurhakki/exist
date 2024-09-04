@@ -13,6 +13,8 @@ dependencies = [
   "pwinput"
 ]
 
+[build-system]
+requires = ["setuptools == 68.2.2"]
 
 [project.urls]
 Homepage = "https://github.com/onurhakki/exist"
