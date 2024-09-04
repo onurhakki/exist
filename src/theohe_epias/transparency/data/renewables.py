@@ -1,13 +1,10 @@
-import requests
-import pandas as pd
 
-from ...transparency.utils.get_time import get_today, get_year, get_yesterday, get_tomorrow, get_this_month, get_current_settlement_fday, get_current_settlement_lday, get_last_year
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_today, get_year, get_today, get_tomorrow, get_this_month, get_current_settlement_fday, get_current_settlement_lday, get_last_year
+
 
 class Renewables():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 #"generation_forecast": {"list":"renewables/data/generation-forecast","export":"renewables/export/generation-forecast"},
 #"imbalance_cost": {"list":"renewables/data/imbalance-cost","export":"renewables/export/imbalance-cost"},
 #"imbalance_quantity": {"list":"renewables/data/imbalance-quantity","export":"renewables/export/imbalance-quantity"},
@@ -27,93 +24,37 @@ class Renewables():
 "unlicensed_generation_amount": {"list":"renewables/data/unlicensed-generation-amount","export":"renewables/export/unlicensed-generation-amount"},
 "unlicensed_generation_cost": {"list":"renewables/data/unlicensed-generation-cost","export":"renewables/export/unlicensed-generation-cost"},
 
-        })
+    })
 
-        self.information["details"] = dict({
-        })
+    information["details"] = {'licensed_generation_cost': ['startDate', 'endDate', 'function'],
+ 'licensed_powerplant_list': ['date', 'function'],
+ 'licensed_realtime_generation': ['powerPlantId',
+  'startDate',
+  'endDate',
+  'function'],
+ 'new_installed_capacity': ['date', 'function'],
+ 'old_installed_capacity': ['date', 'function'],
+ 'renewable_sm_licensed_injection_quantity': ['startDate',
+  'endDate',
+  'function'],
+ 'renewables_participant': ['date', 'function'],
+ 'renewables_support_mechanism_income': ['startDate', 'endDate', 'function'],
+ 'res_generation_and_forecast': ['startDate', 'endDate', 'function'],
+ 'total_cost': ['startDate', 'endDate', 'function'],
+ 'unit_cost': ['startDate', 'endDate', 'function'],
+ 'unlicensed_generation_amount': ['startDate', 'endDate', 'function'],
+ 'unlicensed_generation_cost': ['startDate', 'endDate', 'function']}
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-        self.region = "TR1"
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/consumer-sector-list",
-"https://seffaflik.epias.com.tr/electricity-service/v1/main/province-list",
-"https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/distribution-region",
-"https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/multiple-factor-meter-reading-type",
-"https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/get-distribution-companies",
-
-            ]:
-                return requests.get(url, json=data).json()
-            else:
-                return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time_between_settlement(self, url, startDate, endDate):
-        lday = get_current_settlement_lday()
-        lastDate_tuple = tuple_to_datetime(lday, string_=False)
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        settlement_check = True
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if lastDate_tuple < startDate_tuple:
-            print("StartDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if lastDate_tuple < endDate_tuple:
-            print("EndDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False or settlement_check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
 
     # def generation_forecast(self, 
     #                     startDate = get_today(),
@@ -209,9 +150,10 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("licensed_generation_cost", function)
+        url = self.master.get_url(self.main_url, self.information, "licensed_generation_cost", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -219,8 +161,8 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def licensed_powerplant_list(self, 
@@ -235,15 +177,15 @@ class Renewables():
         function = list
         """
 
-        url = self._get_url("licensed_powerplant_list", function)
+        url = self.master.get_url(self.main_url, self.information, "licensed_powerplant_list", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
-
         data = dict(period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def licensed_realtime_generation(self, 
@@ -256,14 +198,16 @@ class Renewables():
         ----------------------
         Lisanslı YEKDEM santrallerine ait elektrik üretiminin kaynak bazında saatlik gösterimine ilişkin veri seti.
         ----------------------
+        powerPlantId = int default: None
         startDate = (2023,1,1) default: today
         endDate = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("licensed_realtime_generation", function)
+        url = self.master.get_url(self.main_url, self.information, "licensed_realtime_generation", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -273,8 +217,8 @@ class Renewables():
             powerPlantId = powerPlantId,
             startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def new_installed_capacity(self, 
@@ -286,19 +230,18 @@ class Renewables():
         YEKDEM kapsamındaki üretim tesislerinin kurulu güç miktarıdır. Lisanslı kurulu güç bilgileri EPİAŞ'a kayıtlı santraller olup, lisanssız kurulu güç bilgisi dağıtım şirketlerinden temin edilmektedir.YEKDEM kapsamındaki üretim tesislerinin kurulu güç miktarıdır.
         ----------------------
         date = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("new_installed_capacity", function)
+        url = self.master.get_url(self.main_url, self.information, "new_installed_capacity", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
-
         data = dict(period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
 
@@ -310,20 +253,21 @@ class Renewables():
         ----------------------
         YEKDEM kapsamındaki üretim tesislerinin kurulu güç miktarıdır. Lisanslı kurulu güç bilgileri EPİAŞ'a kayıtlı santraller olup, lisanssız kurulu güç bilgisi dağıtım şirketlerinden temin edilmektedir.YEKDEM kapsamındaki üretim tesislerinin kurulu güç miktarıdır.
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
+        date = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("old_installed_capacity", function)
+        url = self.master.get_url(self.main_url, self.information, "old_installed_capacity", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
 
+
         data = dict(period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     # def portfolio_income(self, 
@@ -366,9 +310,10 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("renewable_sm_licensed_injection_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "renewable_sm_licensed_injection_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -376,30 +321,30 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
         
     def renewables_participant(self, 
-                        date = get_year(),
-                        function = "export"):
+                        date = 2021,
+                        function = "list"):
         """
         YEKDEM Katılımcı Listesi Listeleme Servisi 
         ----------------------
         İlgili yıl içerisinde Yenilenebilir Enerji Destekleme Mekanizmasına dahil olan lisanslı üretim santraline sahip tüzel kişilerin listesidir. 2020 yılından itibaren “Önceki Yıl gerçekleştirilen Üretim (MWh)” yayınlanmamaktadır
         ----------------------
-        startDate = (2023,1,1) default: today
+        date = int default: 2021
         function = list veya export
         """
 
-        url = self._get_url("renewables_participant", function)
+        url = self.master.get_url(self.main_url, self.information, "renewables_participant", function)
 
         if date not in [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028]:
             return
 
         data = dict(year = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def renewables_support_mechanism_income(self, 
@@ -416,9 +361,10 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("renewables_support_mechanism_income", function)
+        url = self.master.get_url(self.main_url, self.information, "renewables_support_mechanism_income", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -426,8 +372,8 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def res_generation_and_forecast(self, 
@@ -444,9 +390,11 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("res_generation_and_forecast", function)
+        url = self.master.get_url(self.main_url, self.information, "res_generation_and_forecast", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
+
         if check == False:
             return
         else:
@@ -454,8 +402,8 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
         
     # def spot_order(self, 
     #                     startDate = get_today(),
@@ -498,9 +446,10 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("total_cost", function)
+        url = self.master.get_url(self.main_url, self.information, "total_cost", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -508,8 +457,8 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def unit_cost(self, 
@@ -526,9 +475,10 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("unit_cost", function)
+        url = self.master.get_url(self.main_url, self.information, "unit_cost", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -536,8 +486,8 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def unlicensed_generation_amount(self, 
@@ -554,9 +504,10 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("unlicensed_generation_amount", function)
+        url = self.master.get_url(self.main_url, self.information, "unlicensed_generation_amount", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -564,8 +515,8 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def unlicensed_generation_cost(self, 
@@ -582,9 +533,10 @@ class Renewables():
         function = list veya export
         """
 
-        url = self._get_url("unlicensed_generation_cost", function)
+        url = self.master.get_url(self.main_url, self.information, "unlicensed_generation_cost", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -592,5 +544,5 @@ class Renewables():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result

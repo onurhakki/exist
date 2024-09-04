@@ -1,13 +1,8 @@
-import requests
-import pandas as pd
-
-from ...transparency.utils.get_time import get_today
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_today
 
 class IDM():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "bid_offer_quantities": {"list":"markets/idm/data/bid-offer-quantities","export":"markets/idm/export/bid-offer-quantities"},
 "matching_quantity": {"list":"markets/idm/data/matching-quantity","export":"markets/idm/export/matching-quantity"},
 "min_max_bid_price": {"list":"markets/idm/data/min-max-bid-price","export":"markets/idm/export/min-max-bid-price"},
@@ -17,62 +12,26 @@ class IDM():
 "transaction_history": {"list":"markets/idm/data/transaction-history","export":"markets/idm/export/transaction-history"},
 "weighted_average_price": {"list":"markets/idm/data/weighted-average-price","export":"markets/idm/export/weighted-average-price"},
 
-        })
+    })
 
-        self.information["details"] = dict({
-        })
+    information["details"] = {'bid_offer_quantities': ['startDate', 'endDate', 'function'],
+ 'matching_quantity': ['organizationId', 'startDate', 'endDate', 'function'],
+ 'min_max_bid_price': ['startDate', 'endDate', 'function'],
+ 'min_max_matching_price': ['startDate', 'endDate', 'function'],
+ 'min_max_sales_offer_price': ['startDate', 'endDate', 'function'],
+ 'trade_value': ['startDate', 'endDate', 'function'],
+ 'transaction_history': ['startDate', 'endDate', 'function'],
+ 'weighted_average_price': ['startDate', 'endDate', 'function']}
+    
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
-
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
 
     def bid_offer_quantities(self, 
                         startDate = get_today(),
@@ -88,9 +47,9 @@ class IDM():
         function = list veya export
         """
 
-        url = self._get_url("bid_offer_quantities", function)
+        url = self.master.get_url(self.main_url, self.information, "bid_offer_quantities", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -98,11 +57,12 @@ class IDM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def matching_quantity(self, 
+                          organizationId = None,
                         startDate = get_today(),
                         endDate = get_today(),
                         function = "export"):
@@ -111,23 +71,26 @@ class IDM():
         ----------------------
         Gün İçi Piyasası’nda kontrat türüne göre saatlik veya blok olarak gösterilen toplam eşleşme miktarıdır.
         ----------------------
+        organizationId = int default: None
         startDate = (2023,1,1) default: today
         endDate = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("matching_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "matching_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
             startDate, endDate = check
 
-        data = dict(startDate = startDate,
+        data = dict(
+            organizationId = organizationId,
+            startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def min_max_bid_price(self, 
@@ -144,9 +107,9 @@ class IDM():
         function = list veya export
         """
 
-        url = self._get_url("min_max_bid_price", function)
+        url = self.master.get_url(self.main_url, self.information, "min_max_bid_price", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -154,8 +117,8 @@ class IDM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def min_max_matching_price(self, 
@@ -172,9 +135,9 @@ class IDM():
         function = list veya export
         """
 
-        url = self._get_url("min_max_matching_price", function)
+        url = self.master.get_url(self.main_url, self.information, "min_max_matching_price", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -182,8 +145,8 @@ class IDM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def min_max_sales_offer_price(self, 
@@ -200,9 +163,9 @@ class IDM():
         function = list veya export
         """
 
-        url = self._get_url("min_max_sales_offer_price", function)
+        url = self.master.get_url(self.main_url, self.information, "min_max_sales_offer_price", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -210,8 +173,8 @@ class IDM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def trade_value(self, 
@@ -228,9 +191,9 @@ class IDM():
         function = list veya export
         """
 
-        url = self._get_url("trade_value", function)
+        url = self.master.get_url(self.main_url, self.information, "trade_value", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -238,8 +201,8 @@ class IDM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def transaction_history(self, 
@@ -256,9 +219,9 @@ class IDM():
         function = list veya export
         """
 
-        url = self._get_url("transaction_history", function)
+        url = self.master.get_url(self.main_url, self.information, "transaction_history", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -266,8 +229,8 @@ class IDM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
         
     def weighted_average_price(self, 
@@ -284,9 +247,9 @@ class IDM():
         function = list veya export
         """
 
-        url = self._get_url("weighted_average_price", function)
+        url = self.master.get_url(self.main_url, self.information, "weighted_average_price", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -294,5 +257,5 @@ class IDM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result

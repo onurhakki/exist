@@ -1,13 +1,12 @@
 import requests
 import pandas as pd
 
-from ...transparency.utils.get_time import get_today, get_yesterday, get_this_month, get_year, get_last_year
-from ...transparency.utils.time_format import tuple_to_datetime
+
+from ..utils.get_time import get_today, get_last_year
 
 class YEKG():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "bilateral_contract_list": {"list":"markets/yek-g/data/bilateral-contract-list","export":"markets/yek-g/export/bilateral-contract-list"},
 "cancelation_quantity": {"list":"markets/yek-g/data/cancelation-quantity","export":"markets/yek-g/export/cancelation-quantity"},
 "expiry_quantity": {"list":"markets/yek-g/data/expiry-quantity","export":"markets/yek-g/export/expiry-quantity"},
@@ -19,64 +18,29 @@ class YEKG():
 "withdrawal_quantity": {"list":"markets/yek-g/data/withdrawal-quantity","export":"markets/yek-g/export/withdrawal-quantity"},
 "yekg_matching_quantity": {"list":"markets/yek-g/data/yekg-matching-quantity","export":"markets/yek-g/export/yekg-matching-quantity"},
 
-        })
+    })
 
-        self.information["details"] = dict({
-            "mcp": ["startDate", "endDate", "function"],
-            "interim_mcp": ["date", "function"],
-        })
-
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
-
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
+    information["details"] = {'bilateral_contract_list': ['startDate', 'endDate', 'function'],
+ 'cancelation_quantity': ['startDate', 'endDate', 'function'],
+ 'expiry_quantity': ['startDate', 'endDate', 'function'],
+ 'exported_document_quantity': ['startDate', 'endDate', 'function'],
+ 'market_bid_ask_quantity': ['startDate', 'endDate', 'function'],
+ 'min_max_match_amount_list': ['startDate', 'endDate', 'function'],
+ 'trading_volume': ['startDate', 'endDate', 'function'],
+ 'weighted_average_price': ['startDate', 'endDate', 'function'],
+ 'withdrawal_quantity': ['startDate', 'endDate', 'function'],
+ 'yekg_matching_quantity': ['startDate', 'endDate', 'function']}
+ 
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
 
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
 
     def bilateral_contract_list(self, 
@@ -93,9 +57,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("bilateral_contract_list", function)
+        url = self.master.get_url(self.main_url, self.information, "bilateral_contract_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -103,8 +68,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def cancelation_quantity(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -119,9 +85,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("cancelation_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "cancelation_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -129,8 +96,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def expiry_quantity(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -145,9 +113,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("expiry_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "expiry_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -155,8 +124,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def exported_document_quantity(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -171,9 +141,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("exported_document_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "exported_document_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -181,8 +152,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def market_bid_ask_quantity(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -197,9 +169,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("market_bid_ask_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "market_bid_ask_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -207,8 +180,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def min_max_match_amount_list(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -223,9 +197,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("min_max_match_amount_list", function)
+        url = self.master.get_url(self.main_url, self.information, "min_max_match_amount_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -233,8 +208,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def trading_volume(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -249,9 +225,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("trading_volume", function)
+        url = self.master.get_url(self.main_url, self.information, "trading_volume", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -259,8 +236,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def weighted_average_price(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -275,9 +253,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("weighted_average_price", function)
+        url = self.master.get_url(self.main_url, self.information, "weighted_average_price", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -285,8 +264,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def withdrawal_quantity(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -301,9 +281,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("withdrawal_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "withdrawal_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -311,8 +292,9 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def yekg_matching_quantity(self, 
                         startDate = get_last_year(),
                         endDate = get_today(),
@@ -327,9 +309,10 @@ class YEKG():
         function = list veya export
         """
 
-        url = self._get_url("yekg_matching_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "yekg_matching_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -337,5 +320,5 @@ class YEKG():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result

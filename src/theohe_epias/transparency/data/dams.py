@@ -1,13 +1,10 @@
-import requests
-import pandas as pd
 
-from ...transparency.utils.get_time import get_today, get_year, get_yesterday, get_tomorrow, get_this_month, get_current_settlement_fday, get_current_settlement_lday
-from ...transparency.utils.time_format import tuple_to_datetime
+# from ...transparency.utils.time_format import tuple_to_datetime
+# from ..utils.get_time import get_this_month, get_time_dam
 
 class Dams():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "active_fullness": {"list":"dams/data/active-fullness","export":"dams/export/active-fullness"},
 "active_volume": {"list":"dams/data/active-volume","export":"dams/export/active-volume"},
 "basin_list": {"list":"dams/data/basin-list"},
@@ -19,88 +16,28 @@ class Dams():
 "flow_rate_and_installed_power": {"list":"dams/data/flow-rate-and-installed-power","export":"dams/export/flow-rate-and-installed-power"},
 "water_energy_provision": {"list":"dams/data/water-energy-provision","export":"dams/export/water-energy-provision"},
 
-        })
+    })
 
-        self.information["details"] = dict({
-        })
+    information["details"] = {'active_fullness': ['basinName', 'damName', 'function'],
+ 'active_volume': ['basinName', 'damName', 'function'],
+ 'basin_list': ['function'],
+ 'daily_kot': ['basinName', 'damName', 'function'],
+ 'daily_volume': ['basinName', 'damName', 'function'],
+ 'dam_kot': ['basinName', 'damName', 'function'],
+ 'dam_list': ['basinName', 'function'],
+ 'dam_volume': ['basinName', 'damName', 'function'],
+ 'flow_rate_and_installed_power': ['basinName', 'damName', 'function'],
+ 'water_energy_provision': ['basinName', 'damName', 'function']}
+    
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
-
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-        self.region = "TR1"
-
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/dams/data/basin-list"]:
-                return requests.get(url, json=data).json()
-            else:
-                return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time_between_settlement(self, url, startDate, endDate):
-        lday = get_current_settlement_lday()
-        lastDate_tuple = tuple_to_datetime(lday, string_=False)
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        settlement_check = True
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if lastDate_tuple < startDate_tuple:
-            print("StartDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if lastDate_tuple < endDate_tuple:
-            print("EndDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False or settlement_check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
-
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
     def active_fullness(self, 
                         basinName = None,
@@ -116,7 +53,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("active_fullness", function)
+        url = self.master.get_url(self.main_url, self.information, "active_fullness", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -130,8 +68,8 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def active_volume(self, 
                         basinName = None,
@@ -147,7 +85,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("active_volume", function)
+        url = self.master.get_url(self.main_url, self.information, "active_volume", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -161,11 +100,10 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
         
-    def basin_list(self, 
-                        function = "list"):
+    def basin_list(self, function = "list"):
         """
         Havza listesini dönen servisir. 
         ----------------------
@@ -174,11 +112,11 @@ class Dams():
         function = list
         """
 
-        url = self._get_url("basin_list", function)
+        url = self.master.get_url(self.main_url, self.information, "basin_list", function)
 
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
 
     def daily_kot(self, 
                         basinName = None,
@@ -194,7 +132,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("daily_kot", function)
+        url = self.master.get_url(self.main_url, self.information, "daily_kot", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -208,8 +147,8 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def daily_volume(self, 
                         basinName = None,
@@ -225,7 +164,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("daily_volume", function)
+        url = self.master.get_url(self.main_url, self.information, "daily_volume", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -239,8 +179,8 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def dam_kot(self, 
                         basinName = None,
@@ -256,7 +196,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("dam_kot", function)
+        url = self.master.get_url(self.main_url, self.information, "dam_kot", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -270,8 +211,8 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def dam_list(self, 
@@ -286,15 +227,16 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("dam_list", function)
+        url = self.master.get_url(self.main_url, self.information, "dam_list", function)
         if basinName != None:
             vals = self.basin_list()
             print(vals)
 
 
         data = dict(basinName = basinName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
     def dam_volume(self, 
                         basinName = None,
                         damName = None,
@@ -309,7 +251,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("dam_volume", function)
+        url = self.master.get_url(self.main_url, self.information, "dam_volume", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -323,8 +266,8 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def flow_rate_and_installed_power(self, 
                         basinName = None,
@@ -340,7 +283,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("flow_rate_and_installed_power", function)
+        url = self.master.get_url(self.main_url, self.information, "flow_rate_and_installed_power", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -354,8 +298,8 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def water_energy_provision(self, 
                         basinName = None,
@@ -371,7 +315,8 @@ class Dams():
         function = list veya export
         """
 
-        url = self._get_url("water_energy_provision", function)
+        url = self.master.get_url(self.main_url, self.information, "water_energy_provision", function)
+
         if basinName != None:
             vals = self.basin_list()
             if basinName not in vals:
@@ -385,6 +330,6 @@ class Dams():
                 return
 
         data = dict(basinName = basinName,damName=damName)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 

@@ -1,97 +1,56 @@
-import requests
-import pandas as pd
+from ..utils.get_time import get_this_month, get_time_dam
 
-from ...transparency.utils.get_time import get_today, get_yesterday, get_this_month, get_time_dam
-from ...transparency.utils.time_format import tuple_to_datetime
 
 class DAM():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
-      #      "mcp": {"list":"markets/dam/data/mcp", "export":"markets/dam/export/mcp"},
-       #     "interim_mcp": {"list":"markets/dam/data/interim-mcp", "export":"markets/dam/export/interim-mcp"},
-
-
-"amount_of_block_buying": {"list":"markets/dam/data/amount-of-block-buying","export":"markets/dam/export/amount-of-block-buying"},
-"amount_of_block_selling": {"list":"markets/dam/data/amount-of-block-selling","export":"markets/dam/export/amount-of-block-selling"},
-"clearing_quantity": {"list":"markets/dam/data/clearing-quantity","export":"markets/dam/export/clearing-quantity"},
-"clearing_quantity_organization_list": {"list":"markets/dam/data/clearing-quantity-organization-list"},
-"day_ahead_market_trade_volume": {"list":"markets/dam/data/day-ahead-market-trade-volume","export":"markets/dam/export/day-ahead-market-trade-volume"},
-"flexible_offer_buying_quantity": {"list":"markets/dam/data/flexible-offer-buying-quantity","export":"markets/dam/export/flexible-offer-buying-quantity"},
-"flexible_offer_selling_quantity": {"list":"markets/dam/data/flexible-offer-selling-quantity","export":"markets/dam/export/flexible-offer-selling-quantity"},
-"interim_mcp": {"list":"markets/dam/data/interim-mcp","export":"markets/dam/export/interim-mcp"},
-"interim_mcp_published_status": {"list":"markets/dam/data/interim-mcp-published-status"},
-"matched_flexible_offer_quantity": {"list":"markets/dam/data/matched-flexible-offer-quantity","export":"markets/dam/export/matched-flexible-offer-quantity"},
-"mcp": {"list":"markets/dam/data/mcp","export":"markets/dam/export/mcp"},
-"price_independent_bid": {"list":"markets/dam/data/price-independent-bid","export":"markets/dam/export/price-independent-bid"},
-"price_independent_offer": {"list":"markets/dam/data/price-independent-offer","export":"markets/dam/export/price-independent-offer"},
-"side_payments": {"list":"markets/dam/data/side-payments","export":"markets/dam/export/side-payments"},
-"submitted_bid_order_volume": {"list":"markets/dam/data/submitted-bid-order-volume","export":"markets/dam/export/submitted-bid-order-volume"},
-"submitted_sales_order_volume": {"list":"markets/dam/data/submitted-sales-order-volume","export":"markets/dam/export/submitted-sales-order-volume"},
-"supply_demand": {"list":"markets/dam/data/supply-demand","export":"markets/dam/export/supply-demand"},
-#"supply_demand_chart_data": {"list":"markets/dam/data/supply-demand-chart-data"},
-#"supply_demand_chart_ptf_data": {"list":"markets/dam/data/supply-demand-chart-ptf-data"},
+    information = dict()
+    information["data"] = dict({
+        "amount_of_block_buying": {"list":"markets/dam/data/amount-of-block-buying","export":"markets/dam/export/amount-of-block-buying"},
+        "amount_of_block_selling": {"list":"markets/dam/data/amount-of-block-selling","export":"markets/dam/export/amount-of-block-selling"},
+        "clearing_quantity": {"list":"markets/dam/data/clearing-quantity","export":"markets/dam/export/clearing-quantity"},
+        "clearing_quantity_organization_list": {"list":"markets/dam/data/clearing-quantity-organization-list"},
+        "day_ahead_market_trade_volume": {"list":"markets/dam/data/day-ahead-market-trade-volume","export":"markets/dam/export/day-ahead-market-trade-volume"},
+        "flexible_offer_buying_quantity": {"list":"markets/dam/data/flexible-offer-buying-quantity","export":"markets/dam/export/flexible-offer-buying-quantity"},
+        "flexible_offer_selling_quantity": {"list":"markets/dam/data/flexible-offer-selling-quantity","export":"markets/dam/export/flexible-offer-selling-quantity"},
+        "interim_mcp": {"list":"markets/dam/data/interim-mcp","export":"markets/dam/export/interim-mcp"},
+        "interim_mcp_published_status": {"list":"markets/dam/data/interim-mcp-published-status"},
+        "matched_flexible_offer_quantity": {"list":"markets/dam/data/matched-flexible-offer-quantity","export":"markets/dam/export/matched-flexible-offer-quantity"},
+        "mcp": {"list":"markets/dam/data/mcp","export":"markets/dam/export/mcp"},
+        "price_independent_bid": {"list":"markets/dam/data/price-independent-bid","export":"markets/dam/export/price-independent-bid"},
+        "price_independent_offer": {"list":"markets/dam/data/price-independent-offer","export":"markets/dam/export/price-independent-offer"},
+        "side_payments": {"list":"markets/dam/data/side-payments","export":"markets/dam/export/side-payments"},
+        "submitted_bid_order_volume": {"list":"markets/dam/data/submitted-bid-order-volume","export":"markets/dam/export/submitted-bid-order-volume"},
+        "submitted_sales_order_volume": {"list":"markets/dam/data/submitted-sales-order-volume","export":"markets/dam/export/submitted-sales-order-volume"},
+        "supply_demand": {"list":"markets/dam/data/supply-demand","export":"markets/dam/export/supply-demand"},
         })
+    information["details"] = {
+        'amount_of_block_buying': ['startDate', 'endDate', 'function'],
+        'amount_of_block_selling': ['startDate', 'endDate', 'function'],
+        'clearing_quantity': ['organizationId', 'startDate', 'endDate', 'function'],
+        'clearing_quantity_organization_list': ['date', 'function'],
+        'day_ahead_market_trade_volume': ['startDate', 'endDate', 'function'],
+        'flexible_offer_buying_quantity': ['startDate', 'endDate', 'function'],
+        'flexible_offer_selling_quantity': ['startDate', 'endDate', 'function'],
+        'interim_mcp': ['date', 'function'],
+        'interim_mcp_published_status': ['function'],
+        'matched_flexible_offer_quantity': ['startDate', 'endDate', 'function'],
+        'mcp': ['startDate', 'endDate', 'function'],
+        'price_independent_bid': ['startDate', 'endDate', 'function'],
+        'price_independent_offer': ['startDate', 'endDate', 'function'],
+        'side_payments': ['startDate', 'endDate', 'function'],
+        'submitted_bid_order_volume': ['startDate', 'endDate', 'function'],
+        'submitted_sales_order_volume': ['startDate', 'endDate', 'function'],
+        'supply_demand': ['hour', 'date', 'function']}
+    
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
-        self.information["details"] = dict({
-            "mcp": ["startDate", "endDate", "function"],
-            "interim_mcp": ["date", "function"],
-        })
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
-
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/interim-mcp-published-status"]:
-                return requests.get(url, json=data).json()
-            else:
-                return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
 
 
     def amount_of_block_buying(self, 
@@ -108,9 +67,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("amount_of_block_buying", function)
+        url = self.master.get_url(self.main_url, self.information, "amount_of_block_buying", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -118,8 +77,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
         
     def amount_of_block_selling(self, 
@@ -136,9 +95,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("amount_of_block_selling", function)
+        url = self.master.get_url(self.main_url, self.information, "amount_of_block_selling", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -146,9 +105,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
-
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def clearing_quantity(self, 
                         organizationId,
@@ -167,7 +125,7 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("clearing_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "clearing_quantity", function)
 
         if check_list == True:
             orgs = self.clearing_quantity_organization_list(date = startDate)["items"]
@@ -176,7 +134,7 @@ class DAM():
                 print("organizationId is not in clearing_quantity_organization_list. check these:")
                 return orgs
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -186,8 +144,8 @@ class DAM():
             organizationId = organizationId,
             startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def clearing_quantity_organization_list(self, 
@@ -202,15 +160,15 @@ class DAM():
         function = list
         """
 
-        url = self._get_url("clearing_quantity_organization_list", function)
+        url = self.master.get_url(self.main_url, self.information, "clearing_quantity_organization_list", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
         if date == False:
             return
 
         data = dict(period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def day_ahead_market_trade_volume(self, 
@@ -227,9 +185,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("day_ahead_market_trade_volume", function)
+        url = self.master.get_url(self.main_url, self.information, "day_ahead_market_trade_volume", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -237,8 +195,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def flexible_offer_buying_quantity(self, 
@@ -255,9 +213,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("flexible_offer_buying_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "flexible_offer_buying_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -265,8 +223,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def flexible_offer_selling_quantity(self, 
@@ -283,9 +241,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("flexible_offer_selling_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "flexible_offer_selling_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -293,8 +251,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def interim_mcp(self, 
@@ -309,15 +267,15 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("interim_mcp", function)
+        url = self.master.get_url(self.main_url, self.information, "interim_mcp", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
         if date == False:
             return
 
         data = dict(startDate = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
 
@@ -331,10 +289,11 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("interim_mcp_published_status", function)
+        url = self.master.get_url(self.main_url, self.information, "interim_mcp_published_status", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def matched_flexible_offer_quantity(self, 
@@ -351,9 +310,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("matched_flexible_offer_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "matched_flexible_offer_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -361,8 +320,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def mcp(self, 
@@ -379,9 +338,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("mcp", function)
+        url = self.master.get_url(self.main_url, self.information, "mcp", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -389,8 +348,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def price_independent_bid(self, 
@@ -407,9 +366,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("price_independent_bid", function)
+        url = self.master.get_url(self.main_url, self.information, "price_independent_bid", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -417,8 +376,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def price_independent_offer(self, 
@@ -435,9 +394,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("price_independent_offer", function)
+        url = self.master.get_url(self.main_url, self.information, "price_independent_offer", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -445,8 +404,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def side_payments(self, 
@@ -463,9 +422,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("side_payments", function)
+        url = self.master.get_url(self.main_url, self.information, "side_payments", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -473,8 +432,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def submitted_bid_order_volume(self, 
@@ -491,9 +450,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("submitted_bid_order_volume", function)
+        url = self.master.get_url(self.main_url, self.information, "submitted_bid_order_volume", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -501,8 +460,8 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def submitted_sales_order_volume(self, 
@@ -519,9 +478,9 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("submitted_sales_order_volume", function)
+        url = self.master.get_url(self.main_url, self.information, "submitted_sales_order_volume", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -529,8 +488,10 @@ class DAM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
+
 
 
     def supply_demand(self, 
@@ -547,66 +508,13 @@ class DAM():
         function = list veya export
         """
 
-        url = self._get_url("supply_demand", function)
+        url = self.master.get_url(self.main_url, self.information, "supply_demand", function)
 
-        date = self._control_and_format_time(url, date, hour=hour)
+        date = self.master.control_time(url, date, hour=hour)
         if date == False:
             return
 
         data = dict(date = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
-
-    # def supply_demand_chart_data(self, 
-    #                     startDate = get_today(),
-    #                     endDate = get_today(),
-    #                     function = "export"):
-    #     """
-    #     Arz Talep Grafik Verisi Veri Listeleme Servisi 
-    #     ----------------------
-    #     Arz Talep grafik gösterimi için gelmesi gereken verileri getirir.
-    #     ----------------------
-    #     startDate = (2023,1,1) default: today
-    #     endDate = (2023,1,1) default: today
-    #     function = list veya export
-    #     """
-
-    #     url = self._get_url("supply_demand_chart_data", function)
-
-    #     check = self._control_and_format_time_between(url, startDate, endDate)
-    #     if check == False:
-    #         return
-    #     else:
-    #         startDate, endDate = check
-
-    #     data = dict(startDate = startDate,
-    #                 endDate = endDate)
-    #     self.final_result = self._request_data(url, data, function)
-    #     return self.final_result
-    # def supply_demand_chart_ptf_data(self, 
-    #                     startDate = get_today(),
-    #                     endDate = get_today(),
-    #                     function = "export"):
-    #     """
-    #     Arz Talep Grafik Saatlik Ptf Verisi Servisi 
-    #     ----------------------
-    #     Arz Talep grafik gösterimi için Fiyat,Eşleştirme Miktarı verilerini getirir.
-    #     ----------------------
-    #     startDate = (2023,1,1) default: today
-    #     endDate = (2023,1,1) default: today
-    #     function = list veya export
-    #     """
-
-    #     url = self._get_url("supply_demand_chart_ptf_data", function)
-
-    #     check = self._control_and_format_time_between(url, startDate, endDate)
-    #     if check == False:
-    #         return
-    #     else:
-    #         startDate, endDate = check
-
-    #     data = dict(startDate = startDate,
-    #                 endDate = endDate)
-    #     self.final_result = self._request_data(url, data, function)
-    #     return self.final_result

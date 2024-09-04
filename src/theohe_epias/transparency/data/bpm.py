@@ -1,72 +1,30 @@
-import requests
-import pandas as pd
-
-from ...transparency.utils.get_time import get_time_bpm, get_today, get_yesterday, get_this_month
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_today, get_yesterday
 
 class BPM():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "order_summary_down": {"list":"markets/bpm/data/order-summary-down","export":"markets/bpm/export/order-summary-down"},
 "order_summary_up": {"list":"markets/bpm/data/order-summary-up","export":"markets/bpm/export/order-summary-up"},
 "system_direction": {"list":"markets/bpm/data/system-direction","export":"markets/bpm/export/system-direction"},
 "smp": {"list":"markets/bpm/data/system-marginal-price","export":"markets/bpm/export/system-marginal-price"},
-        })
+    })
 
-        self.information["details"] = dict({
-        })
+    information["details"] = {'order_summary_down': ['startDate', 'endDate', 'function'],
+ 'order_summary_up': ['startDate', 'endDate', 'function'],
+ 'system_direction': ['startDate', 'endDate', 'function'],
+ 'smp': ['startDate', 'endDate', 'function']}
+    
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
 
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
 
     def order_summary_down(self, 
                         startDate = get_yesterday(),
@@ -82,9 +40,10 @@ class BPM():
         function = list veya export
         """
 
-        url = self._get_url("order_summary_down", function)
+        url = self.master.get_url(self.main_url, self.information, "order_summary_down", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -92,8 +51,8 @@ class BPM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def order_summary_up(self, 
@@ -110,9 +69,10 @@ class BPM():
         function = list veya export
         """
 
-        url = self._get_url("order_summary_up", function)
+        url = self.master.get_url(self.main_url, self.information, "order_summary_up", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -120,8 +80,8 @@ class BPM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def system_direction(self, 
@@ -138,9 +98,10 @@ class BPM():
         function = list veya export
         """
 
-        url = self._get_url("system_direction", function)
+        url = self.master.get_url(self.main_url, self.information, "system_direction", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+        
         if check == False:
             return
         else:
@@ -148,8 +109,8 @@ class BPM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def smp(self, 
@@ -166,9 +127,10 @@ class BPM():
         function = list veya export
         """
 
-        url = self._get_url("smp", function)
+        url = self.master.get_url(self.main_url, self.information, "smp", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+        
         if check == False:
             return
         else:
@@ -176,5 +138,5 @@ class BPM():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result

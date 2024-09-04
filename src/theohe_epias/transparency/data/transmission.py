@@ -1,13 +1,8 @@
-import requests
-import pandas as pd
-
-from ...transparency.utils.get_time import get_today, get_year, get_yesterday, get_tomorrow, get_this_month, get_current_settlement_fday, get_current_settlement_lday
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_today, get_year, get_today, get_year, get_this_month, get_current_settlement_fday, get_current_settlement_lday
 
 class Transmission():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 
 "capacity_demand": {"list":"transmission/data/capacity-demand","export":"transmission/export/capacity-demand-export"},
 "capacity_demand_direction": {"list":"transmission/data/capacity-demand-direction"},
@@ -26,89 +21,33 @@ class Transmission():
 
         })
 
-        self.information["details"] = dict({
-        })
+    information["details"] = {'capacity_demand': ['direction', 'startDate', 'endDate', 'function'],
+ 'capacity_demand_direction': ['function'],
+ 'congestion_cost': ['startDate', 'endDate', 'function'],
+ 'entso_w_organization': ['organizationId', 'date', 'function'],
+#  'entso_w_uevcb': ['uevcbName', 'provinceId', 'date','function'],
+ 'international_line_events': ['startDate', 'endDate', 'function'],
+ 'iskk_list': ['startDate', 'endDate', 'function'],
+ 'line_capacities': ['direction', 'startDate', 'endDate', 'function'],
+ 'line_capacities_direction': ['function'],
+ 'nominal_capacity': ['startDate', 'endDate', 'function'],
+ 'organization_list': ['organizationId', 'date', 'function'],
+ 'tcat_pre_month_forecast': ['startDate', 'endDate', 'function'],
+ 'tcat_pre_year_forecast': ['startDate', 'endDate', 'function'],
+ 'zero_balance': ['startDate', 'endDate', 'function']}
 
-        self.information["rename_columns"] = dict(
+
+
+    information["rename_columns"] = dict(
             PTF="PTF (TL/MWh)",
             SMF="SMF (TL/MWh)",
             )
 
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-        self.region = "TR1"
 
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/transmission/data/capacity-demand-direction",
-"https://seffaflik.epias.com.tr/electricity-service/v1/transmission/data/line-capacities-direction",
-
-            ]:
-                return requests.get(url, json=data).json()
-            else:
-                return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time_between_settlement(self, url, startDate, endDate):
-        lday = get_current_settlement_lday()
-        lastDate_tuple = tuple_to_datetime(lday, string_=False)
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        settlement_check = True
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if lastDate_tuple < startDate_tuple:
-            print("StartDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if lastDate_tuple < endDate_tuple:
-            print("EndDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False or settlement_check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
-
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
     def capacity_demand(self, 
     direction = "TRGR",
@@ -126,12 +65,13 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("capacity_demand", function)
         if direction not in ["TRGR","GRTR", "TRBG", "BGTR"]:
             print("direction is not correct.")
             return 
+        url = self.master.get_url(self.main_url, self.information, "capacity_demand", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -140,8 +80,8 @@ class Transmission():
         data = dict(direction = direction, 
                     startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def capacity_demand_direction(self, 
                         function = "list"):
@@ -153,10 +93,11 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("capacity_demand_direction", function)
+        url = self.master.get_url(self.main_url, self.information, "capacity_demand_direction", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def congestion_cost(self, 
@@ -175,8 +116,6 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("congestion_cost", function)
-
         if orderType not in ["UP_REGULATION", "DOWN_REGULATION", "BOTH_REGULATIONS"]:
             print("select order type: UP_REGULATION, DOWN_REGULATION or BOTH_REGULATIONS")
             return 
@@ -185,7 +124,9 @@ class Transmission():
             return 
 
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        url = self.master.get_url(self.main_url, self.information, "congestion_cost", function)
+
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -196,9 +137,9 @@ class Transmission():
             priceType = priceType,
             startDate = startDate,
                     endDate = endDate,
-                    region = self.region)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+                    region = self.master.region)
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
 
@@ -211,21 +152,22 @@ class Transmission():
         ----------------------
         Avrupa Elektrik İletim Sistemi İşletmecileri Ağı’nın piyasadaki Santral ve UEVÇB’lere, Avrupa standartlarına uygun formatta tanımladığı Enerji Tanımlama Kodu’dur.
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
+        organizationId = int default: None
+        date = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("entso_w_organization", function)
+        url = self.master.get_url(self.main_url, self.information, "entso_w_organization", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
 
         data = dict(organizationId = organizationId,
                     period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def entso_w_uevcb(self, 
     uevcbName = None,
@@ -237,22 +179,24 @@ class Transmission():
         ----------------------
         ENTSO-E (W) UEVCB Listeleme Servisi
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
+        uevcbName = int default: None
+        provinceId = int default: None
+        date = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("entso_w_uevcb", function)
+        url = self.master.get_url(self.main_url, self.information, "entso_w_uevcb", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
 
         data = dict(uevcbName = uevcbName,
     provinceId = provinceId,
     period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def international_line_events(self, 
@@ -268,10 +212,10 @@ class Transmission():
         endDate = (2023,1,1) default: today
         function = list veya export
         """
+        url = self.master.get_url(self.main_url, self.information, "international_line_events", function)
 
-        url = self._get_url("international_line_events", function)
+        check = self.master.control_time_between(url, startDate, endDate)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -279,8 +223,8 @@ class Transmission():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def iskk_list(self, 
@@ -297,9 +241,10 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("iskk_list", function)
+        url = self.master.get_url(self.main_url, self.information, "iskk_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+        
         if check == False:
             return
         else:
@@ -307,8 +252,8 @@ class Transmission():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def line_capacities(self, 
     direction = "TRGR",
@@ -326,13 +271,14 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("line_capacities", function)
-
         if direction not in ["TRGR","GRTR", "TRBG", "BGTR"]:
             print("direction is not correct.")
             return 
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        url = self.master.get_url(self.main_url, self.information, "line_capacities", function)
+
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -341,8 +287,8 @@ class Transmission():
         data = dict(direction = direction, 
                     startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def line_capacities_direction(self, 
@@ -352,15 +298,14 @@ class Transmission():
         ----------------------
         Hat kapasiteleri yön listeleme servisi
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("line_capacities_direction", function)
+        url = self.master.get_url(self.main_url, self.information, "line_capacities_direction", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
 
     def nominal_capacity(self, 
                         startDate = get_current_settlement_fday(),
@@ -376,9 +321,10 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("nominal_capacity", function)
+        url = self.master.get_url(self.main_url, self.information, "nominal_capacity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -386,8 +332,8 @@ class Transmission():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def organization_list(self, 
@@ -399,21 +345,23 @@ class Transmission():
         ----------------------
         Avrupa Elektrik İletim Sistemi İşletmecileri Ağı’nın piyasadaki organizasyonlara, Avrupa standartlarına uygun formatta tanımladığı Enerji Tanımlama Kodu’dur.
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
+        organizationId = int default: None
+        date = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("organization_list", function)
+        url = self.master.get_url(self.main_url, self.information, "organization_list", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
 
+
         data = dict(organizationId = organizationId,
                     period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def tcat_pre_month_forecast(self, 
@@ -430,9 +378,10 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("tcat_pre_month_forecast", function)
+        url = self.master.get_url(self.main_url, self.information, "tcat_pre_month_forecast", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -440,8 +389,8 @@ class Transmission():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def tcat_pre_year_forecast(self, 
                         startDate = get_this_month(),
@@ -457,9 +406,10 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("tcat_pre_year_forecast", function)
+        url = self.master.get_url(self.main_url, self.information, "tcat_pre_year_forecast", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -467,8 +417,8 @@ class Transmission():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def zero_balance(self, 
                         startDate = get_year(),
@@ -484,9 +434,10 @@ class Transmission():
         function = list veya export
         """
 
-        url = self._get_url("zero_balance", function)
+        url = self.master.get_url(self.main_url, self.information, "zero_balance", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -494,5 +445,5 @@ class Transmission():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result

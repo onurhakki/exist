@@ -1,13 +1,8 @@
-import requests
-import pandas as pd
-
-from ...transparency.utils.get_time import get_today, get_year, get_yesterday, get_tomorrow, get_current_settlement_fday, get_current_settlement_lday
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_today, get_year, get_yesterday, get_tomorrow, get_current_settlement_fday, get_current_settlement_lday
 
 class Consumption():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "consumer_quantity": {"list":"consumption/data/consumer-quantity","export":"consumption/export/consumer-quantity"},
 "consumer_sector_list": {"list":"consumption/data/consumer-sector-list"},
 "consumption_quantity": {"list":"consumption/data/consumption-quantity","export":"consumption/export/consumption-quantity"},
@@ -22,7 +17,8 @@ class Consumption():
 "main_tariff_group_list": {"list":"consumption/data/main-tariff-group-list"},
 
 "meter_count": {"list":"consumption/data/meter-count","export":"consumption/export/meter-count-export"},
-"monthly_index": {"list":"consumption/data/monthly-index","export":"consumption/export/monthly-index"},
+# "monthly_index": {"list":"consumption/data/monthly-index","export":"consumption/export/monthly-index"},
+
 "multiple_factor": {"list":"consumption/data/multiple-factor","export":"consumption/export/multiple-factor"},
 "multiple_factor_distribution": {"list":"consumption/data/multiple-factor-distribution"},
 "multiple_factor_meter_reading_type": {"list":"consumption/data/multiple-factor-meter-reading-type"},
@@ -37,95 +33,63 @@ class Consumption():
 "uecm": {"list":"consumption/data/uecm","export":"consumption/export/uecm-export"},
 "unplanned_power_outage_info": {"list":"consumption/data/unplanned-power-outage-info","export":"consumption/export/unplanned-power-outage-info"},
 "withdrawal_quantity_under_supply_liability": {"list":"consumption/data/withdrawal-quantity-under-supply-liability","export":"consumption/export/withdrawal-quantity-under-supply-liability"},
+ 
+    })
 
-        })
+    information["details"] = {'consumer_quantity': ['provinceId', 'profileGroupId', 'date', 'function'],
+ 'consumer_sector_list': ['function'],
+ 'consumption_quantity': ['provinceId', 'profileGroupId', 'date', 'function'],
+ 'demand_forecast': ['distrubutionOrganization', 'function'],
+ 'distribution_region': ['function'],
+ 'district_list': ['provinceId', 'function'],
+ 'eligible_consumer_count': ['provinceId',
+  'districtName',
+  'profileGroupName',
+  'date',
+  'function'],
+ 'eligible_consumer_quantity': ['startDate', 'endDate', 'function'],
+ 'get_distribution_companies': ['function'],
+ 'load_estimation_plan': ['startDate', 'endDate', 'function'],
+ 'main_tariff_group_list': ['startDate', 'endDate', 'function'],
+ 'meter_count': ['function'],
+ 'multiple_factor': ['distributionId',
+  'meterReadingType',
+  'subscriberProfileGroup',
+  'date',
+  'function'],
+ 'multiple_factor_distribution': ['date', 'function'],
+ 'multiple_factor_meter_reading_type': ['function'],
+ 'multiple_factor_profile_group': ['distributionId', 'date', 'function'],
+ 'percentage_consumption_info': ['provinceId', 'date', 'function'],
+ 'planned_power_outage_info': ['distributionCompanyId',
+  'provinceId',
+  'date',
+  'function'],
+ 'profile_subscription_group_list': ['date', 'function'],
+ 'province_list': ['function'],
+ 'realtime_consumption': ['startDate', 'endDate', 'function'],
+ 'st_adedi': ['startDate', 'endDate', 'function'],
+ 'st_uecm': ['date', 'function'],
+ 'uecm': ['startDate', 'endDate', 'function'],
+ 'unplanned_power_outage_info': ['distributionCompanyId',
+  'provinceId',
+  'date',
+  'function'],
+ 'withdrawal_quantity_under_supply_liability': ['startDate',
+  'endDate',
+  'function']}
 
-        self.information["details"] = dict({
-        })
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
+    
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-        self.region = "TR1"
-
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/consumer-sector-list",
-"https://seffaflik.epias.com.tr/electricity-service/v1/main/province-list",
-"https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/distribution-region",
-"https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/multiple-factor-meter-reading-type",
-"https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/main-tariff-group-list",
-"https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/get-distribution-companies",
-
-            ]:
-                return requests.get(url, json=data).json()
-            else:
-                return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time_between_settlement(self, url, startDate, endDate):
-        lday = get_current_settlement_lday()
-        lastDate_tuple = tuple_to_datetime(lday, string_=False)
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        settlement_check = True
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if lastDate_tuple < startDate_tuple:
-            print("StartDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if lastDate_tuple < endDate_tuple:
-            print("EndDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False or settlement_check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
 
     def consumer_quantity(self, 
                         provinceId = None,
@@ -139,13 +103,14 @@ class Consumption():
         ----------------------
         provinceId = int default: None
         profileGroupId = int default: None
-        period = (2023,1,1) default: last settlement period
+        date = (2023,1,1) default: last settlement period
         function = list veya export
         """
 
-        url = self._get_url("consumer_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "consumer_quantity", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
 
@@ -153,8 +118,8 @@ class Consumption():
                         profileGroupId=profileGroupId,
                         period = date)
         try:
-            self.final_result = self._request_data(url, data, function)
-            return self.final_result
+            self.result = self.master.request_data(url, data, function, self.headers, self.information)
+            return self.result
         except:
             print("There is no data for given period or not valid IDs, check these.")
             return self.consumer_sector_list(), self.province_list()
@@ -172,13 +137,13 @@ class Consumption():
         ----------------------
         provinceId = int default: None
         profileGroupId = int default: None
-        period = (2023,1,1) default: last settlement period
+        date = (2023,1,1) default: last settlement period
         function = list veya export
         """
 
-        url = self._get_url("consumption_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "consumption_quantity", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
         if date == False:
             return
 
@@ -186,8 +151,8 @@ class Consumption():
                         profileGroupId=profileGroupId,
                         period = date)
         try:
-            self.final_result = self._request_data(url, data, function)
-            return self.final_result
+            self.result = self.master.request_data(url, data, function, self.headers, self.information)
+            return self.result
         except:
             print("There is no data for given period or not valid IDs, check these.")
             return self.consumer_sector_list(), self.province_list()
@@ -201,17 +166,16 @@ class Consumption():
         ----------------------
         İlgili dağıtım bölgesinde dağıtım şirketine ait 2018-2027 arası tüketicilerin yıllık brüt tahmin değerleridir. Veriler TEAİŞ Raporlarından temin edilmektedir.
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
+        distrubutionOrganization = int default: None
         function = list veya export
         """
 
-        url = self._get_url("demand_forecast", function)
+        url = self.master.get_url(self.main_url, self.information, "demand_forecast", function)
 
         data = dict(distrubutionOrganization = distrubutionOrganization)
         try:
-            self.final_result = self._request_data(url, data, function)
-            return self.final_result
+            self.result = self.master.request_data(url, data, function, self.headers, self.information)
+            return self.result
         except:
             print("Not valid IDs, check these.")
             return self.distribution_region()["items"]
@@ -231,22 +195,25 @@ class Consumption():
         provinceId = int default: None,
         districtName = str default: None,
         profileGroupName = str default: None,
-        period = (2023,1,1) default: last settlement
+        date = (2023,1,1) default: last settlement
         function = list veya export
         """
+        
+        url = self.master.get_url(self.main_url, self.information, "eligible_consumer_count", function)
 
-        url = self._get_url("eligible_consumer_count", function)
+        date = self.master.control_time(url, date)
 
-        date = self._control_and_format_time(url, date)
         if date == False:
             return
+
         data = dict(districtName = districtName,
                         provinceId = provinceId,
                         profileGroupName = profileGroupName,
                         period = date)
         try:
-            self.final_result = self._request_data(url, data, function)
-            return self.final_result
+            self.result = self.master.request_data(url, data, function, self.headers, self.information)
+            return self.result
+
         except:
             print("There is no data for given period or not valid IDs, check these.")
             print("profileGroupName should be in upper case. (Aydınlatma => AYDINLATMA)")
@@ -267,9 +234,11 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("eligible_consumer_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        url = self.master.get_url(self.main_url, self.information, "eligible_consumer_quantity", function)
+
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -277,8 +246,9 @@ class Consumption():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
     def st_adedi(self, 
                         startDate = get_current_settlement_fday(),
@@ -294,9 +264,10 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("st_adedi", function)
+        url = self.master.get_url(self.main_url, self.information, "st_adedi", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -304,8 +275,9 @@ class Consumption():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def load_estimation_plan(self, 
@@ -322,9 +294,10 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("load_estimation_plan", function)
+        url = self.master.get_url(self.main_url, self.information, "load_estimation_plan", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -332,8 +305,9 @@ class Consumption():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def meter_count(self, 
@@ -345,10 +319,12 @@ class Consumption():
         ----------------------
         function = list veya export
         """
-        url = self._get_url("meter_count", function)
+        url = self.master.get_url(self.main_url, self.information, "meter_count", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     # def monthly_index(self, 
@@ -390,15 +366,16 @@ class Consumption():
         function = list
         """
 
-        url = self._get_url("multiple_factor_distribution", function)
+        url = self.master.get_url(self.main_url, self.information, "multiple_factor_distribution", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
-
         data = dict(period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def multiple_factor_meter_reading_type(self, 
@@ -411,10 +388,12 @@ class Consumption():
         function = list
         """
 
-        url = self._get_url("multiple_factor_meter_reading_type", function)
+        url = self.master.get_url(self.main_url, self.information, "multiple_factor_meter_reading_type", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
+
 
     def multiple_factor_profile_group(self, 
                         distributionId = None,
@@ -430,8 +409,12 @@ class Consumption():
         function = list
         """
 
-        url = self._get_url("multiple_factor_profile_group", function)
+        url = self.master.get_url(self.main_url, self.information, "multiple_factor_profile_group", function)
 
+        date_new = self.master.control_time(url, date)
+
+        if date_new == False:
+            return
 
         disco_list = self.multiple_factor_distribution(date)
         discos = [k["id"] for k in disco_list]
@@ -439,13 +422,10 @@ class Consumption():
             print("Select from distribution ids.")
             return disco_list
 
-        date = self._control_and_format_time(url, date)
-        if date == False:
-            return
+        data = dict(distributionId = distributionId, period = date_new)
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
-        data = dict(distributionId = distributionId, period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
 
     def multiple_factor(self, 
                         distributionId = None,
@@ -459,14 +439,15 @@ class Consumption():
         Uzlaştırma dönemi bazında ölçüm yapılamayan sayaçlar için uygulanan profilleme işleminde kullanılan değerlere ilişkin veri seti.
         ----------------------
         distributionId = int
-        subscriberProfileGroup = int
         meterReadingType = 1,3 default:1,
+        subscriberProfileGroup = int
         date = (2023,1,1) default: last settlement
         function = list veya export
         """
 
-        url = self._get_url("multiple_factor", function)
-        date_new = self._control_and_format_time(url, date)
+        url = self.master.get_url(self.main_url, self.information, "multiple_factor", function)
+        date_new = self.master.control_time(url, date)
+
         if date_new == False:
             return
 
@@ -489,8 +470,9 @@ class Consumption():
             subscriberProfileGroup = subscriberProfileGroup,
             period = date_new)
 
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
         
         
 
@@ -503,20 +485,21 @@ class Consumption():
         ----------------------
         Fiili tüketimin il bazında ve profil abone grubu bazında yüzdesel kırılımına ilişkin veri seti.
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
+        provinceId = int default: None
+        date = (2023,1,1) default: today
         function = list veya export
         """
+        url = self.master.get_url(self.main_url, self.information, "percentage_consumption_info", function)
 
-        url = self._get_url("percentage_consumption_info", function)
+        date = self.master.control_time(url, date)
 
-        date = self._control_and_format_time(url, date)
         if date == False:
             return
 
         data = dict(provinceId = provinceId, period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
 
@@ -535,10 +518,10 @@ class Consumption():
         date = (2023,1,1) default: tomorrow
         function = list veya export
         """
+        url = self.master.get_url(self.main_url, self.information, "planned_power_outage_info", function)
 
-        url = self._get_url("planned_power_outage_info", function)
+        date = self.master.control_time(url, date)
 
-        date = self._control_and_format_time(url, date)
         if date == False:
             return
 
@@ -561,13 +544,14 @@ class Consumption():
         data = dict(distributionCompanyId = distributionCompanyId,
                     provinceId = provinceId,
                         period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def unplanned_power_outage_info(self, 
-    distributionCompanyId = None,
-    provinceId = None,
+                        distributionCompanyId = None,
+                        provinceId = None,
                         date = get_yesterday(),
                         function = "export"):
         """
@@ -581,9 +565,10 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("unplanned_power_outage_info", function)
+        url = self.master.get_url(self.main_url, self.information, "unplanned_power_outage_info", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
 
@@ -606,8 +591,9 @@ class Consumption():
         data = dict(distributionCompanyId = distributionCompanyId,
                     provinceId = provinceId,
                         period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
 
@@ -626,9 +612,9 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("realtime_consumption", function)
+        url = self.master.get_url(self.main_url, self.information, "realtime_consumption", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -636,8 +622,9 @@ class Consumption():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
     def st_uecm(self, 
                 date = get_current_settlement_fday(),
@@ -651,15 +638,16 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("st_uecm", function)
+        url = self.master.get_url(self.main_url, self.information, "st_uecm", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
-
         data = dict(period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def uecm(self, 
@@ -676,9 +664,9 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("uecm", function)
+        url = self.master.get_url(self.main_url, self.information, "uecm", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -686,8 +674,9 @@ class Consumption():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def withdrawal_quantity_under_supply_liability(self, 
@@ -704,9 +693,9 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("withdrawal_quantity_under_supply_liability", function)
+        url = self.master.get_url(self.main_url, self.information, "withdrawal_quantity_under_supply_liability", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -714,8 +703,9 @@ class Consumption():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def consumer_sector_list(self, 
@@ -728,10 +718,12 @@ class Consumption():
         function = list
         """
 
-        url = self._get_url("consumer_sector_list", function)
+        url = self.master.get_url(self.main_url, self.information, "consumer_sector_list", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
     def distribution_region(self, 
@@ -744,10 +736,11 @@ class Consumption():
         function = list
         """
 
-        url = self._get_url("distribution_region", function)
+        url = self.master.get_url(self.main_url, self.information, "distribution_region", function)
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
+
 
     def district_list(self,
                     provinceId,
@@ -757,13 +750,16 @@ class Consumption():
         ----------------------
         Şehir bilgisine göre ilçe listelesini dönen servistir.
         ----------------------
+        provinceId = int default: None
         function = list
         """
 
-        url = self._get_url("district_list", function)
+        url = self.master.get_url(self.main_url, self.information, "district_list", function)
+
         data = dict(provinceId=provinceId)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
+
 
     def get_distribution_companies(self, 
                         function = "list"):
@@ -775,10 +771,12 @@ class Consumption():
         function = list
         """
 
-        url = self._get_url("get_distribution_companies", function)
+        url = self.master.get_url(self.main_url, self.information, "get_distribution_companies", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
+
 
     def main_tariff_group_list(self, 
                         startDate = get_today(),
@@ -794,9 +792,9 @@ class Consumption():
         function = list veya export
         """
 
-        url = self._get_url("main_tariff_group_list", function)
+        url = self.master.get_url(self.main_url, self.information, "main_tariff_group_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -804,13 +802,13 @@ class Consumption():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
 
 
 
-    def province_list(self, 
-                        function = "list"):
+
+    def province_list(self, function = "list"):
         """
         Şehir Listeleme Servisi 
         ----------------------
@@ -819,10 +817,12 @@ class Consumption():
         function = list
         """
 
-        url = self._get_url("province_list", function)
+        url = self.master.get_url(self.main_url, self.information, "province_list", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
+
 
 
 
@@ -834,18 +834,17 @@ class Consumption():
         ----------------------
         İl ilçe st adedi sayfası için profil abone grubu listesi döner
         ----------------------
-        startDate = (2023,1,1) default: today
-        endDate = (2023,1,1) default: today
+        date = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("profile_subscription_group_list", function)
+        url = self.master.get_url(self.main_url, self.information, "profile_subscription_group_list", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
-
         data = dict(period = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 

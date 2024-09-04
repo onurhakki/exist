@@ -2,10 +2,8 @@ from pathlib import Path
 
 import setuptools
 
-VERSION = "0.0.12"  # PEP-440
-
+VERSION = "0.0.12"
 NAME = "theohe-epias"
-
 INSTALL_REQUIRES = [
   "requests",
   "pandas",

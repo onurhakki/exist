@@ -1,13 +1,8 @@
-import requests
-import pandas as pd
-
-from ...transparency.utils.get_time import get_today, get_year, get_tomorrow, get_current_settlement_fday, get_current_settlement_lday, get_last_year
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_today, get_year, get_tomorrow, get_current_settlement_fday, get_current_settlement_lday, get_last_year
 
 class Production():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "aic": {"list":"generation/data/aic","export":"generation/export/aic"},
 "dpp": {"list":"generation/data/dpp","export":"generation/export/dpp"},
 "injection_quantity": {"list":"generation/data/injection-quantity","export":"generation/export/injection-quantity"},
@@ -19,91 +14,30 @@ class Production():
 "region_list": {"list":"generation/data/region-list"},
 "sbfgp": {"list":"generation/data/sbfgp","export":"generation/export/sbfgp"},
 "uevcb_list": {"list":"generation/data/uevcb-list"},
-        })
+    })
 
-        self.information["details"] = dict({
-        })
+    information["details"] = {'aic': ['uevcbId', 'organizationId', 'startDate', 'endDate', 'function'],
+ 'dpp': ['uevcbId', 'organizationId', 'startDate', 'endDate', 'function'],
+ 'injection_quantity': ['powerPlantId', 'startDate', 'endDate', 'function'],
+ 'injection_quantity_powerplant_list': ['function'],
+ 'licensed_powerplant_investment_list': ['startDate', 'endDate', 'function'],
+ 'organization_list': ['startDate', 'endDate', 'function'],
+ 'powerplant_list': ['function'],
+ 'realtime_generation': ['powerPlantId', 'startDate', 'endDate', 'function'],
+ 'region_list': ['function'],
+ 'sbfgp': ['uevcbId', 'organizationId', 'startDate', 'endDate', 'function'],
+ 'uevcb_list': ['organizationId', 'startDate', 'function']}
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
 
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
-        self.region = "TR1"
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
-
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
-
-    def _request_data(self, url, data, function):
-        if function == "list":
-            if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/injection-quantity-powerplant-list",
-            "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/powerplant-list",
-            "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/region-list",
-
-            ]:
-                return requests.get(url, json=data).json()
-            else:
-                return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time_between_settlement(self, url, startDate, endDate):
-        lday = get_current_settlement_lday()
-        lastDate_tuple = tuple_to_datetime(lday, string_=False)
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        settlement_check = True
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if lastDate_tuple < startDate_tuple:
-            print("StartDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if lastDate_tuple < endDate_tuple:
-            print("EndDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False or settlement_check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
     def aic(self,
             uevcbId = None,
@@ -123,7 +57,8 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("aic", function)
+        url = self.master.get_url(self.main_url, self.information, "aic", function)
+
         if organizationId == None:
             uevcbId = None
         else:
@@ -135,7 +70,7 @@ class Production():
                     return self.uevcb_list(organizationId, date = startDate)
 
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -146,10 +81,10 @@ class Production():
             organizationId = organizationId,
             startDate = startDate,
                     endDate = endDate,
-                    region = self.region
+                    region = self.master.region
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def dpp(self, 
@@ -170,7 +105,7 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("dpp", function)
+        url = self.master.get_url(self.main_url, self.information, "dpp", function)
 
         if organizationId == None:
             uevcbId = None
@@ -182,7 +117,7 @@ class Production():
                     print("Possible UEVCB IDs: {}".format(uevcbs))
                     return self.uevcb_list(organizationId, date = startDate)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -193,14 +128,14 @@ class Production():
             organizationId = organizationId,
             startDate = startDate,
                     endDate = endDate,
-                    region = self.region
+                    region = self.master.region
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def injection_quantity(self,
-                    powerplantId = None,
+                    powerPlantId = None,
                         startDate = get_current_settlement_fday(),
                         endDate = get_current_settlement_lday(),
                         function = "export"):
@@ -209,37 +144,37 @@ class Production():
         ----------------------
         Uzlaştırmaya esas veriş birimlerinin, bir uzlaştırma dönemi içinde saatlik olarak sisteme verdiği elektrik miktarının toplam değeridir.
         ----------------------
-        powerplantId = int default: None
+        powerPlantId = int default: None
         startDate = (2023,1,1) default: today
         endDate = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("injection_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "injection_quantity", function)
 
-        if powerplantId != None:
+        if powerPlantId != None:
             pp_list = self.injection_quantity_powerplant_list()
             pp_ids = [k["id"] for k in pp_list["items"]]
-            if powerplantId not in pp_ids:
-                print("powerplantId is not found.")
+            if powerPlantId not in pp_ids:
+                print("powerPlantId is not found.")
                 return pp_list
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
             startDate, endDate = check
 
         data = dict(
-            powerplantId = powerplantId,
+            powerplantId = powerPlantId,
             startDate = startDate,
                     endDate = endDate,
                     )
         try:
-            self.final_result = self._request_data(url, data, function)
-            return self.final_result
+            self.result = self.master.request_data(url, data, function, self.headers, self.information)
+            return self.result
         except:
-            print("Not valid powerplantID, check these.")
+            print("Not valid powerPlantId, check these.")
             return self.injection_quantity_powerplant_list()["items"]
 
 
@@ -258,9 +193,9 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("licensed_powerplant_investment_list", function)
+        url = self.master.get_url(self.main_url, self.information, "licensed_powerplant_investment_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -268,13 +203,13 @@ class Production():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
 
     def realtime_generation(self, 
-                    powerplantId = None,
+                    powerPlantId = None,
                         startDate = get_today(),
                         endDate = get_today(),
                         function = "export"):
@@ -283,29 +218,29 @@ class Production():
         ----------------------
         Elektrik üretiminin kaynak bazında saatlik gösterimidir.
         ----------------------
-        powerplantId = int default: None
+        powerPlantId = int default: None
         startDate = (2023,1,1) default: today
         endDate = (2023,1,1) default: today
         function = list veya export
         """
 
-        url = self._get_url("realtime_generation", function)
+        url = self.master.get_url(self.main_url, self.information, "realtime_generation", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
             startDate, endDate = check
 
         data = dict(
-            powerPlantId = powerplantId,
+            powerPlantId = powerPlantId,
             startDate = startDate,
                     endDate = endDate,
                     )
 
         try:
-            self.final_result = self._request_data(url, data, function)
-            return self.final_result
+            self.result = self.master.request_data(url, data, function, self.headers, self.information)
+            return self.result
         except:
             print("Not valid powerplantID, check these.")
             return self.powerplant_list()["items"]
@@ -330,7 +265,8 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("sbfgp", function)
+        url = self.master.get_url(self.main_url, self.information, "sbfgp", function)
+
 
         if organizationId == None:
             uevcbId = None
@@ -343,7 +279,7 @@ class Production():
                     return self.uevcb_list(organizationId, date = startDate)
 
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -354,10 +290,10 @@ class Production():
             organizationId = organizationId,
             startDate = startDate,
                     endDate = endDate,
-                    region = self.region
+                    region = self.master.region
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
 
@@ -375,15 +311,16 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("uevcb_list", function)
+        url = self.master.get_url(self.main_url, self.information, "uevcb_list", function)
 
-        date = self._control_and_format_time(url, date)
+        date = self.master.control_time(url, date)
+
         if date == False:
             return
 
         data = dict(organizationId = organizationId, startDate = date)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
 
@@ -401,10 +338,10 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("organization_list", function)
+        url = self.master.get_url(self.main_url, self.information, "organization_list", function)
 
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -412,9 +349,8 @@ class Production():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
-
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def injection_quantity_powerplant_list(self, 
                         function = "list"):
@@ -426,14 +362,14 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("injection_quantity_powerplant_list", function)
+        url = self.master.get_url(self.main_url, self.information, "injection_quantity_powerplant_list", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def powerplant_list(self, 
-                    powerplantId = None,
                         function = "list"):
         """
         Santral Listeleme Servisi 
@@ -443,10 +379,11 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("powerplant_list", function)
+        url = self.master.get_url(self.main_url, self.information, "powerplant_list", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
 
     def region_list(self, 
                         function = "list"):
@@ -458,9 +395,10 @@ class Production():
         function = list veya export
         """
 
-        url = self._get_url("region_list", function)
+        url = self.master.get_url(self.main_url, self.information, "region_list", function)
+
         data = dict()
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data_get(url, data, function, self.headers, self.information)
+        return self.result
 
 

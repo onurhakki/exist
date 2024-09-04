@@ -1,13 +1,8 @@
-import requests
-import pandas as pd
-
-from ...transparency.utils.get_time import get_today, get_yesterday, get_this_month, get_last_year
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_today, get_last_year
 
 class PFM():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "contract_price_summary": {"list":"markets/pfm/data/contract-price-summary","export":"markets/pfm/export/contract-price-summary"},
 "ggf": {"list":"markets/pfm/data/ggf","export":"markets/pfm/export/ggf"},
 "offer_price": {"list":"markets/pfm/data/offer-price","export":"markets/pfm/export/offer-price"},
@@ -15,76 +10,30 @@ class PFM():
 "pfm_trade_value": {"list":"markets/pfm/data/pfm-trade-value","export":"markets/pfm/export/pfm-trade-value"},
 "pfm_transaction_history": {"list":"markets/pfm/data/pfm-transaction-history","export":"markets/pfm/export/pfm-transaction-history"},
 "vep_matching_quantity": {"list":"markets/pfm/data/vep-matching-quantity","export":"markets/pfm/export/vep-matching-quantity"},
-
 "load_type_list": {"list":"markets/pfm/data/load-type-list"},
 "delivery_period_list": {"list":"markets/pfm/data/delivery-period-list"},
 "delivery_year_list": {"list":"markets/pfm/data/delivery-year-list"},
 "th_delivery_period_list": {"list":"markets/pfm/data/th-delivery-period-list"},
 "ggf_delivery_period_list": {"list":"markets/pfm/data/ggf-delivery-period-list"},
 
-        })
+    })
 
-        self.information["details"] = dict({
-            "mcp": ["startDate", "endDate", "function"],
-            "interim_mcp": ["date", "function"],
-        })
-
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
-
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
+    information["details"] = {'contract_price_summary': ['deliveryPeriod',   'loadType',   'year',   'startDate',   'endDate',   'function'],  'ggf': ['deliveryPeriod',   'loadType',   'year',   'startDate',   'endDate',   'function'],  'offer_price': ['startDate', 'endDate', 'function'],  'open_position': ['deliveryPeriod',   'loadType',   'year',   'startDate',   'endDate',   'function'],  'pfm_trade_value': ['deliveryPeriod',   'loadType',   'year',   'startDate',   'endDate',   'function'],  'pfm_transaction_history': ['deliveryPeriod',   'loadType',   'year',   'startDate',   'endDate',   'function'],  'vep_matching_quantity': ['deliveryPeriod',   'loadType',   'year',   'startDate',   'endDate',   'function'],  'load_type_list': ['startDate', 'endDate', 'function'],
+ 'delivery_period_list': ['startDate', 'endDate', 'function'],
+ 'delivery_year_list': ['startDate', 'endDate', 'function'],
+ 'th_delivery_period_list': ['startDate', 'endDate', 'function'],
+ 'ggf_delivery_period_list': ['startDate', 'endDate', 'function']}
 
 
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
-    def _request_data(self, url, data, function):
-        if function == "list":
-            if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/interim-mcp-published-status"]:
-                return requests.get(url, json=data).json()
-            else:
-                return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        check = True if startDate_tuple <= endDate_tuple else False
-        print(startDate_tuple, endDate_tuple)
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
-
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
     def contract_price_summary(self, 
                         deliveryPeriod = None,
@@ -106,7 +55,7 @@ class PFM():
         function = list veya export
         """
 
-        url = self._get_url("contract_price_summary", function)
+        url = self.master.get_url(self.main_url, self.information, "contract_price_summary", function)
 
         if deliveryPeriod != None:
             v = self.delivery_period_list(startDate,endDate)["items"]
@@ -129,7 +78,7 @@ class PFM():
                 print("year should be in {}.".format(v))
                 return
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -142,8 +91,8 @@ class PFM():
                     loadType = loadType,
                     year = year, 
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def delivery_period_list(self, 
                         startDate = get_today(),
@@ -159,9 +108,9 @@ class PFM():
         function = list
         """
 
-        url = self._get_url("delivery_period_list", function)
+        url = self.master.get_url(self.main_url, self.information, "delivery_period_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -170,8 +119,8 @@ class PFM():
         data = dict(startDate = startDate,
                     endDate = endDate,
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def delivery_year_list(self, 
                         startDate = get_today(),
@@ -187,9 +136,9 @@ class PFM():
         function = list
         """
 
-        url = self._get_url("delivery_year_list", function)
+        url = self.master.get_url(self.main_url, self.information, "delivery_year_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -198,8 +147,8 @@ class PFM():
         data = dict(startDate = startDate,
                     endDate = endDate,
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def ggf(self, 
                         deliveryPeriod = None,
@@ -221,7 +170,7 @@ class PFM():
         function = list veya export
         """
 
-        url = self._get_url("ggf", function)
+        url = self.master.get_url(self.main_url, self.information, "ggf", function)
 
         if deliveryPeriod != None:
             v = self.ggf_delivery_period_list(startDate,endDate)["items"]
@@ -244,7 +193,7 @@ class PFM():
                 print("year should be in {}.".format(v))
                 return
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -256,8 +205,8 @@ class PFM():
                     loadType = loadType,
                     year = year, 
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def ggf_delivery_period_list(self, 
                         startDate = get_today(),
@@ -273,9 +222,9 @@ class PFM():
         function = list
         """
 
-        url = self._get_url("ggf_delivery_period_list", function)
+        url = self.master.get_url(self.main_url, self.information, "ggf_delivery_period_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -284,8 +233,8 @@ class PFM():
         data = dict(startDate = startDate,
                     endDate = endDate,
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def load_type_list(self, 
                         startDate = get_today(),
@@ -301,9 +250,9 @@ class PFM():
         function = list
         """
 
-        url = self._get_url("load_type_list", function)
+        url = self.master.get_url(self.main_url, self.information, "load_type_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -312,8 +261,8 @@ class PFM():
         data = dict(startDate = startDate,
                     endDate = endDate,
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def offer_price(self, 
                         startDate = get_last_year(),
@@ -329,9 +278,9 @@ class PFM():
         function = list veya export
         """
 
-        url = self._get_url("offer_price", function)
+        url = self.master.get_url(self.main_url, self.information, "offer_price", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -340,8 +289,8 @@ class PFM():
         data = dict(startDate = startDate,
                     endDate = endDate,
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def open_position(self, 
                         deliveryPeriod = None,
@@ -363,9 +312,9 @@ class PFM():
         function = list veya export
         """
 
-        url = self._get_url("open_position", function)
+        url = self.master.get_url(self.main_url, self.information, "open_position", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -377,8 +326,8 @@ class PFM():
                     loadType = loadType,
                     year = year, 
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def pfm_trade_value(self, 
                         deliveryPeriod = None,
@@ -400,7 +349,7 @@ class PFM():
         function = list veya export
         """
 
-        url = self._get_url("pfm_trade_value", function)
+        url = self.master.get_url(self.main_url, self.information, "pfm_trade_value", function)
 
         if deliveryPeriod != None:
             v = self.delivery_period_list(startDate,endDate)["items"]
@@ -423,7 +372,7 @@ class PFM():
                 print("year should be in {}.".format(v))
                 return
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -435,8 +384,8 @@ class PFM():
                     loadType = loadType,
                     year = year, 
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def pfm_transaction_history(self, 
                         deliveryPeriod = None,
@@ -458,7 +407,7 @@ class PFM():
         function = list veya export
         """
 
-        url = self._get_url("pfm_transaction_history", function)
+        url = self.master.get_url(self.main_url, self.information, "pfm_transaction_history", function)
 
         if deliveryPeriod != None:
             v = self.th_delivery_period_list(startDate,endDate)["items"]
@@ -481,7 +430,7 @@ class PFM():
                 print("year should be in {}.".format(v))
                 return
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -494,8 +443,8 @@ class PFM():
                     loadType = loadType,
                     year = year, 
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def th_delivery_period_list(self, 
                         startDate = get_today(),
@@ -511,9 +460,9 @@ class PFM():
         function = list
         """
 
-        url = self._get_url("th_delivery_period_list", function)
+        url = self.master.get_url(self.main_url, self.information, "th_delivery_period_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -522,8 +471,8 @@ class PFM():
         data = dict(startDate = startDate,
                     endDate = endDate,
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
     def vep_matching_quantity(self, 
                         deliveryPeriod = None,
@@ -545,7 +494,7 @@ class PFM():
         function = list veya export
         """
 
-        url = self._get_url("vep_matching_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "vep_matching_quantity", function)
 
         if deliveryPeriod != None:
             v = self.delivery_period_list(startDate,endDate)["items"]
@@ -568,7 +517,7 @@ class PFM():
                 print("year should be in {}.".format(v))
                 return
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
         if check == False:
             return
         else:
@@ -580,5 +529,5 @@ class PFM():
                     loadType = loadType,
                     year = year, 
                     )
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result

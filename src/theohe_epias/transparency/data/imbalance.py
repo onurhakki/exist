@@ -1,83 +1,31 @@
-import requests
-import pandas as pd
-
-from ...transparency.utils.get_time import get_today, get_yesterday, get_this_month, get_current_settlement_day, get_current_settlement_fday, get_current_settlement_lday, get_last_year
-
-from ...transparency.utils.time_format import tuple_to_datetime
+from ..utils.get_time import get_current_settlement_fday, get_current_settlement_lday, get_last_year
 
 class IB():
-    def __init__(self):
-        self.information = dict()
-        self.information["data"] = dict({
+    information = dict()
+    information["data"] = dict({
 "dsg_imbalance_quantity": {"list":"markets/imbalance/data/dsg-imbalance-quantity","export":"markets/imbalance/export/dsg-imbalance-quantity"},
 "dsg_organization_list": {"list":"markets/imbalance/data/dsg-organization-list"},
 "imbalance_amount": {"list":"markets/imbalance/data/imbalance-amount","export":"markets/imbalance/export/imbalance-amount"},
 "imbalance_quantity": {"list":"markets/imbalance/data/imbalance-quantity","export":"markets/imbalance/export/imbalance-quantity"},
 
-        })
+    })
 
-        self.information["details"] = dict({
-        })
+    information["details"] = {'dsg_imbalance_quantity': ['dsg', 'startDate', 'endDate', 'function'],
+ 'dsg_organization_list': ['startDate', 'endDate', 'function'],
+ 'imbalance_amount': ['startDate', 'endDate', 'function'],
+ 'imbalance_quantity': ['startDate', 'endDate', 'function']}
 
-        self.information["rename_columns"] = dict(
-            PTF="PTF (TL/MWh)",
-            SMF="SMF (TL/MWh)",
-            )
-
-        self.main_url = "https://seffaflik.epias.com.tr/electricity-service/v1/"
+    information["rename_columns"] = dict(
+        PTF="PTF (TL/MWh)",
+        SMF="SMF (TL/MWh)",
+        )
 
 
-    def _get_url(self, attr, function):
-        if function in ["export","list"]:
-            url = self.main_url + self.information["data"][attr][function]
-            return url
-        else:
-            print("Not Defined Function.")
-            return None
-        
+    def __init__(self, root_url, master):
+        self.main_url = root_url + "electricity-service/v1/"
+        self.master = master
+        self.headers = {"TGT":self.master.tgt_response, "Content-Type": "application/json"}
 
-    def _request_data(self, url, data, function):
-        if function == "list":
-            return requests.post(url, json=data).json()
-        elif function == "export":
-            data["exportType"] = "XLSX"
-            val = requests.post(url, json=data)
-            try:
-                res = pd.read_excel(val.content)
-                res = res.rename(columns = self.information["rename_columns"]) 
-                return res
-            except:
-                print(val.json()["errors"])
-                return val.json()
-
-    def _control_and_format_time_between(self, url, startDate, endDate):
-        fday, lday = get_current_settlement_day()
-        lastDate_tuple = tuple_to_datetime(lday, string_=False)
-        startDate_tuple = tuple_to_datetime(startDate, string_=False)
-        endDate_tuple = tuple_to_datetime(endDate, string_=False)
-        settlement_check = True
-        check = True if startDate_tuple <= endDate_tuple else False
-        if check == False:
-            print("EndDate has to be greater or equal to StartDate.")
-        if lastDate_tuple < startDate_tuple:
-            print("StartDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if lastDate_tuple < endDate_tuple:
-            print("EndDate has to be lower than settlement date {}-{}-{}.".format(*lday))
-            settlement_check = False
-        if url == None or startDate_tuple == False or endDate_tuple == False or check == False or settlement_check == False:
-            return False
-        else:
-            startDate = tuple_to_datetime(startDate, string_=True)
-            endDate = tuple_to_datetime(endDate, string_=True)
-            return [startDate, endDate]
-
-    def _control_and_format_time(self, url, date, hour = 0):
-        date = tuple_to_datetime(date, hour= hour)
-        if url == None or date == False:
-            return False
-        else:
-            return date
 
     def dsg_imbalance_quantity(self, 
                         dsg = None,
@@ -95,9 +43,10 @@ class IB():
         function = list veya export
         """
 
-        url = self._get_url("dsg_imbalance_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "dsg_imbalance_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -106,8 +55,8 @@ class IB():
         data = dict(dsg = dsg,
                     startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def dsg_organization_list(self,
@@ -124,9 +73,10 @@ class IB():
         function = list veya export
         """
 
-        url = self._get_url("dsg_organization_list", function)
+        url = self.master.get_url(self.main_url, self.information, "dsg_organization_list", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -134,8 +84,8 @@ class IB():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def imbalance_amount(self, 
@@ -152,9 +102,10 @@ class IB():
         function = list veya export
         """
 
-        url = self._get_url("imbalance_amount", function)
+        url = self.master.get_url(self.main_url, self.information, "imbalance_amount", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -162,8 +113,8 @@ class IB():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
 
 
     def imbalance_quantity(self, 
@@ -180,9 +131,10 @@ class IB():
         function = list veya export
         """
 
-        url = self._get_url("imbalance_quantity", function)
+        url = self.master.get_url(self.main_url, self.information, "imbalance_quantity", function)
 
-        check = self._control_and_format_time_between(url, startDate, endDate)
+        check = self.master.control_time_between(url, startDate, endDate)
+
         if check == False:
             return
         else:
@@ -190,5 +142,5 @@ class IB():
 
         data = dict(startDate = startDate,
                     endDate = endDate)
-        self.final_result = self._request_data(url, data, function)
-        return self.final_result
+        self.result = self.master.request_data(url, data, function, self.headers, self.information)
+        return self.result
