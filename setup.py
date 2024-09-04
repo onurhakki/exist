@@ -23,7 +23,7 @@ setuptools.setup(
     },
     author="Onur Hakkı Eyüboğlu",
     author_email="eyubogluo@itu.edu.tr",
-    license="MIT License",
+    # license="MIT License",
     python_requires=">=3.8",
     # Requirements
     install_requires=INSTALL_REQUIRES,
