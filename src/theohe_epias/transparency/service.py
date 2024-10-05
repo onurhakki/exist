@@ -52,7 +52,8 @@ class Auth():
                     "Accept": "text/plain",
 
                     "Content-Type": "application/x-www-form-urlencoded"
-                })
+                },
+                verify=self.verify)
             
             self.status  = self.check_password()
             self.tgt_response = self.tgt_request.text
@@ -83,10 +84,11 @@ class WebServiceTransparency(
     ):
     services = ['ancillary_services', 'bilateral_contracts', 'bpm', 'consumption', 'dam', 'dams', 'general_data', 'idm', 'imbalance', 'mms', 'pfm', 'production', 'renewables', 'reports', 'transmission', 'yekg']
     region = "TR1"
-    def __init__(self, username, test = None, password = None):
+    def __init__(self, username, test = None, password = None, verify=True):
         self.username = username
         self.cas_url = 'https://giris.epias.com.tr/cas/v1/tickets' if test == None else f'https://giris-{test}.epias.com.tr/cas/v1/tickets'
         self.root_url = 'https://seffaflik.epias.com.tr/' if test == None else f'https://seffaflik-{test}.epias.com.tr/'
+        self.verify = verify
         
         if password != None:
             self.login(password)
@@ -192,11 +194,10 @@ class WebServiceTransparency(
         else:
             return date
 
-    @staticmethod
-    def request_data(url, data, function, headers, information):
+    def request_data(self, url, data, function, headers, information):
         if function == "list":
             try:
-                return requests.post(url, json=data, headers=headers).json()
+                return requests.post(url, json=data, headers=headers, verify=self.verify).json()
             except Exception as e:
                 raise e
             # except:
@@ -207,7 +208,7 @@ class WebServiceTransparency(
             
         if function == "export":
             data["exportType"] = "XLSX"
-            val = requests.post(url, json=data, headers=headers)
+            val = requests.post(url, json=data, headers=headers, verify=self.verify)
             try:
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=UserWarning, module=re.escape('openpyxl.styles.stylesheet'))
@@ -218,11 +219,10 @@ class WebServiceTransparency(
                 print(val.json()["errors"])
                 raise e
             
-    @staticmethod
-    def request_data_get(url, data, function, headers, information):
+    def request_data_get(self, url, data, function, headers, information):
         if function == "list":
             try:
-                return requests.get(url, json=data, headers=headers).json()
+                return requests.get(url, json=data, headers=headers, verify=self.verify).json()
             except Exception as e:
                 raise e
             # except:
@@ -235,27 +235,3 @@ class WebServiceTransparency(
         #     if url in ["https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/interim-mcp-published-status"]:
         #         return requests.get(url, json=data).json()
         #     else:
-                
-
-
-
-# class WebServiceTransparency():
-#     def __init__(self):
-#         # self.reports = Reports()
-#         # self.idm = IDM()        
-#         # self.bpm = BPM()
-#         # self.ancillary_services = AS()
-#         # self.bilateral_contracts = BC()
-#         # self.imbalance = IB()
-#         # self.general_data = GD()
-#         # self.production = Production()
-#         # self.consumption = Consumption()
-#         # self.renewables = Renewables()
-#         # self.transmission = Transmission()
-#         # self.dams = Dams()
-#         # self.mms = MMS()        
-#         # self.yekg = YEKG()
-#         # self.pfm = PFM()
-
-
-
